@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+data/*.db
+data/*.db-shm
+data/*.db-wal
+.env
+.env.*
+!.env.example
+*.log
+*.zip
+tsconfig.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
