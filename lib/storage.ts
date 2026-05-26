@@ -1,12 +1,14 @@
-import {
-  createApplication as createSqliteApplication,
-  listApplications as listSqliteApplications,
-  updateApplicationStatus as updateSqliteApplicationStatus,
-  updateTelegramStatus as updateSqliteTelegramStatus,
-  type ApplicationRecord,
-  type ApplicationStatus
-} from './db';
 import type { ApplicationInput } from './validation';
+
+export type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
+
+export type ApplicationRecord = ApplicationInput & {
+  id: string;
+  status: ApplicationStatus;
+  telegramStatus: 'sent' | 'failed' | 'not_configured';
+  createdAt: string;
+  updatedAt: string;
+};
 
 type SupabaseApplicationRow = {
   id: string;
@@ -39,12 +41,6 @@ type SupabaseApplicationRow = {
   created_at: string;
   updated_at: string;
 };
-
-function storageDriver() {
-  if (process.env.STORAGE_DRIVER === 'supabase' || process.env.SUPABASE_URL) return 'supabase';
-  if (process.env.STORAGE_DRIVER === 'file' || process.env.STORAGE_DRIVER === 'netlify_blobs' || process.env.NETLIFY === 'true') return 'file';
-  return 'sqlite';
-}
 
 function createRecord(data: ApplicationInput): ApplicationRecord {
   const now = new Date().toISOString();
@@ -95,9 +91,7 @@ function toRow(application: ApplicationRecord): SupabaseApplicationRow {
 function normalizeStatus(status: unknown): ApplicationStatus {
   const value = String(status || 'new');
   if (value === 'contacted' || value === 'in_review' || value === 'in_work' || value === 'waiting_client') return 'invoice_sent';
-  if (['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'].includes(value)) {
-    return value as ApplicationStatus;
-  }
+  if (['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'].includes(value)) return value as ApplicationStatus;
   return 'new';
 }
 
@@ -212,7 +206,7 @@ async function uploadSupabasePresentation(application: ApplicationRecord) {
   };
 }
 
-async function createSupabaseApplication(data: ApplicationInput) {
+export async function createApplication(data: ApplicationInput) {
   const application = await uploadSupabasePresentation(createRecord(data));
   const rows = await supabaseRequest<SupabaseApplicationRow[]>('applications?select=*', {
     method: 'POST',
@@ -223,12 +217,12 @@ async function createSupabaseApplication(data: ApplicationInput) {
   return fromRow(rows[0]);
 }
 
-async function listSupabaseApplications() {
+export async function listApplications() {
   const rows = await supabaseRequest<SupabaseApplicationRow[]>('applications?select=*&order=created_at.desc&limit=300');
   return rows.map(fromRow);
 }
 
-async function updateSupabaseTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
+export async function updateTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
   await supabaseRequest<null>(`applications?id=eq.${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { Prefer: 'return=minimal' },
@@ -236,7 +230,7 @@ async function updateSupabaseTelegramStatus(id: string, status: ApplicationRecor
   });
 }
 
-async function updateSupabaseApplicationStatus(id: string, status: ApplicationStatus) {
+export async function updateApplicationStatus(id: string, status: ApplicationStatus) {
   const rows = await supabaseRequest<SupabaseApplicationRow[]>(`applications?id=eq.${encodeURIComponent(id)}&select=*`, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },
@@ -245,83 +239,3 @@ async function updateSupabaseApplicationStatus(id: string, status: ApplicationSt
 
   return rows[0] ? fromRow(rows[0]) : null;
 }
-
-async function getFileStoragePath() {
-  const path = await import('node:path');
-  return process.env.APPLICATIONS_FILE_PATH || path.join('/tmp', 'retail-ready-applications.json');
-}
-
-async function readFileApplications() {
-  const fs = await import('node:fs/promises');
-  const filePath = await getFileStoragePath();
-
-  try {
-    const raw = await fs.readFile(filePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed as ApplicationRecord[] : [];
-  } catch (error: any) {
-    if (error?.code === 'ENOENT') return [];
-    throw error;
-  }
-}
-
-async function writeFileApplications(applications: ApplicationRecord[]) {
-  const fs = await import('node:fs/promises');
-  const path = await import('node:path');
-  const filePath = await getFileStoragePath();
-
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, JSON.stringify(applications, null, 2), 'utf8');
-}
-
-export async function createApplication(data: ApplicationInput) {
-  const driver = storageDriver();
-  if (driver === 'supabase') return createSupabaseApplication(data);
-  if (driver === 'sqlite') return createSqliteApplication(data);
-
-  const applications = await readFileApplications();
-  const application = createRecord(data);
-  applications.unshift(application);
-  await writeFileApplications(applications.slice(0, 300));
-  return application;
-}
-
-export async function updateTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
-  const driver = storageDriver();
-  if (driver === 'supabase') return updateSupabaseTelegramStatus(id, status);
-  if (driver === 'sqlite') {
-    updateSqliteTelegramStatus(id, status);
-    return;
-  }
-
-  const applications = await readFileApplications();
-  const next = applications.map(application =>
-    application.id === id ? { ...application, telegramStatus: status, updatedAt: new Date().toISOString() } : application
-  );
-  await writeFileApplications(next);
-}
-
-export async function updateApplicationStatus(id: string, status: ApplicationStatus) {
-  const driver = storageDriver();
-  if (driver === 'supabase') return updateSupabaseApplicationStatus(id, status);
-  if (driver === 'sqlite') return updateSqliteApplicationStatus(id, status);
-
-  const applications = await readFileApplications();
-  const application = applications.find(item => item.id === id);
-  if (!application) return null;
-  const updated = { ...application, status, updatedAt: new Date().toISOString() };
-  await writeFileApplications(applications.map(item => item.id === id ? updated : item));
-  return updated;
-}
-
-export async function listApplications() {
-  const driver = storageDriver();
-  if (driver === 'supabase') return listSupabaseApplications();
-  if (driver === 'sqlite') return listSqliteApplications();
-
-  return (await readFileApplications())
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
-    .slice(0, 300);
-}
-
-export type { ApplicationStatus };
