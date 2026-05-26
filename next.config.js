@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
-const isNetlify = process.env.NETLIFY === 'true';
-
 const nextConfig = {
-  ...(isNetlify ? {} : { output: 'standalone' }),
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   async headers() {
