@@ -1,10 +1,15 @@
 import type { ApplicationInput } from './validation';
+import type { AuditBlockResult, AuditDraft } from './audit-methodology';
 import { normalizeTariff } from './tariffs';
 import {
   createApplication as createSqliteApplication,
+  getApplication as getSqliteApplication,
+  getAuditByApplicationId as getSqliteAuditByApplicationId,
   listApplications as listSqliteApplications,
+  updateAudit as updateSqliteAudit,
   updateApplicationStatus as updateSqliteApplicationStatus,
-  updateTelegramStatus as updateSqliteTelegramStatus
+  updateTelegramStatus as updateSqliteTelegramStatus,
+  upsertAudit as upsertSqliteAudit
 } from './db';
 
 export type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
@@ -13,6 +18,14 @@ export type ApplicationRecord = ApplicationInput & {
   id: string;
   status: ApplicationStatus;
   telegramStatus: 'sent' | 'failed' | 'not_configured';
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AuditRecord = AuditDraft & {
+  id: string;
+  applicationId: string;
+  status: 'draft' | 'expert_review' | 'approved';
   createdAt: string;
   updatedAt: string;
 };
@@ -45,6 +58,21 @@ type SupabaseApplicationRow = {
   notes: string | null;
   status: string;
   telegram_status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type SupabaseAuditRow = {
+  id: string;
+  application_id: string;
+  status: string;
+  overall_score: number;
+  readiness_level: string;
+  verdict: string;
+  summary: string;
+  blocks_json: AuditBlockResult[] | string | null;
+  recommendations_json: string[] | string | null;
+  roadmap_json: string[] | string | null;
   created_at: string;
   updated_at: string;
 };
@@ -133,6 +161,48 @@ function fromRow(row: SupabaseApplicationRow): ApplicationRecord {
     telegramStatus: (row.telegram_status || 'not_configured') as ApplicationRecord['telegramStatus'],
     createdAt: row.created_at,
     updatedAt: row.updated_at
+  };
+}
+
+function parseJsonField<T>(value: T | string | null, fallback: T): T {
+  if (!value) return fallback;
+  if (typeof value !== 'string') return value;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function fromAuditRow(row: SupabaseAuditRow): AuditRecord {
+  return {
+    id: row.id,
+    applicationId: row.application_id,
+    status: ['draft', 'expert_review', 'approved'].includes(row.status) ? row.status as AuditRecord['status'] : 'draft',
+    overallScore: Number(row.overall_score || 0),
+    readinessLevel: row.readiness_level || '',
+    verdict: row.verdict || '',
+    summary: row.summary || '',
+    blocks: parseJsonField<AuditBlockResult[]>(row.blocks_json, []),
+    recommendations: parseJsonField<string[]>(row.recommendations_json, []),
+    roadmap: parseJsonField<string[]>(row.roadmap_json, []),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function auditToRow(applicationId: string, draft: AuditDraft, status: AuditRecord['status'] = 'draft') {
+  return {
+    application_id: applicationId,
+    status,
+    overall_score: draft.overallScore,
+    readiness_level: draft.readinessLevel,
+    verdict: draft.verdict,
+    summary: draft.summary,
+    blocks_json: draft.blocks,
+    recommendations_json: draft.recommendations,
+    roadmap_json: draft.roadmap,
+    updated_at: new Date().toISOString()
   };
 }
 
@@ -260,4 +330,67 @@ export async function updateApplicationStatus(id: string, status: ApplicationSta
   });
 
   return rows[0] ? fromRow(rows[0]) : null;
+}
+
+export async function getApplication(id: string) {
+  if (!hasSupabaseConfig()) return getSqliteApplication(id);
+
+  const rows = await supabaseRequest<SupabaseApplicationRow[]>(`applications?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+  return rows[0] ? fromRow(rows[0]) : null;
+}
+
+export async function getAuditByApplicationId(applicationId: string) {
+  if (!hasSupabaseConfig()) return getSqliteAuditByApplicationId(applicationId);
+
+  const rows = await supabaseRequest<SupabaseAuditRow[]>(
+    `audits?application_id=eq.${encodeURIComponent(applicationId)}&select=*&order=updated_at.desc&limit=1`
+  );
+  return rows[0] ? fromAuditRow(rows[0]) : null;
+}
+
+export async function upsertAudit(applicationId: string, draft: AuditDraft, status: AuditRecord['status'] = 'draft') {
+  if (!hasSupabaseConfig()) return upsertSqliteAudit(applicationId, draft, status);
+
+  const existing = await getAuditByApplicationId(applicationId);
+  if (existing) {
+    const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(existing.id)}&select=*`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify(auditToRow(applicationId, draft, status))
+    });
+    return rows[0] ? fromAuditRow(rows[0]) : null;
+  }
+
+  const rows = await supabaseRequest<SupabaseAuditRow[]>('audits?select=*', {
+    method: 'POST',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({
+      id: `AUD-${Date.now().toString(36).toUpperCase()}`,
+      ...auditToRow(applicationId, draft, status),
+      created_at: new Date().toISOString()
+    })
+  });
+  return rows[0] ? fromAuditRow(rows[0]) : null;
+}
+
+export async function updateAudit(audit: Pick<AuditRecord, 'id' | 'status' | 'overallScore' | 'readinessLevel' | 'verdict' | 'summary' | 'blocks' | 'recommendations' | 'roadmap'>) {
+  if (!hasSupabaseConfig()) return updateSqliteAudit(audit);
+
+  const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(audit.id)}&select=*`, {
+    method: 'PATCH',
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({
+      status: audit.status,
+      overall_score: audit.overallScore,
+      readiness_level: audit.readinessLevel,
+      verdict: audit.verdict,
+      summary: audit.summary,
+      blocks_json: audit.blocks,
+      recommendations_json: audit.recommendations,
+      roadmap_json: audit.roadmap,
+      updated_at: new Date().toISOString()
+    })
+  });
+
+  return rows[0] ? fromAuditRow(rows[0]) : null;
 }

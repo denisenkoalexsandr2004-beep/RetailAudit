@@ -220,6 +220,8 @@ export default function AdminApplicationsPage() {
         <div className="adminExactLinks">
           <a href="/">Главная</a>
           <a href="/form">Форма</a>
+          {token && <a href={selected ? `/admin/applications/${selected.id}/audit` : '/admin/applications'}>Audit Studio</a>}
+          <a href="/audit-studio-demo.html">Демо Audit Studio</a>
           {token && <button className="adminExactLogout" type="button" onClick={logoutAdmin}>Выйти</button>}
           <a className="adminExactNavBtn" href="/">Открыть сайт</a>
         </div>
@@ -347,6 +349,7 @@ export default function AdminApplicationsPage() {
                   <div className="adminExactGrid">
                     <div><span>Компания</span><b>{selected.company}</b></div>
                     <div><span>Тариф</span><b>{getTariffLabel(selected.tariff)}</b></div>
+                    <div><span>Внутренний аудит</span><b><a href={`/admin/applications/${selected.id}/audit`}>Открыть Audit Studio</a></b></div>
                     <div><span>Telegram-уведомление</span><b>{telegramLabels[selected.telegramStatus]}</b></div>
                     <div><span>Федеральные сети</span><b>{selected.federalNetworks || '-'}</b></div>
                     <div><span>Региональные сети</span><b>{selected.regionalNetworks || '-'}</b></div>
