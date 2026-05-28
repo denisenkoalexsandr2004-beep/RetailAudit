@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ApplicationInput } from './validation';
+import { normalizeTariff } from './tariffs';
 
 export type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
 export type LegacyApplicationStatus = 'contacted' | 'in_review';
@@ -89,6 +90,7 @@ export function getDb() {
   addColumn('presentation_name', 'TEXT');
   addColumn('presentation_type', 'TEXT');
   addColumn('presentation_size', 'INTEGER');
+  addColumn('notes', 'TEXT');
   return db;
 }
 
@@ -107,7 +109,7 @@ function map(row: Record<string, unknown>): ApplicationRecord {
     category: String(row.category),
     productName: String(row.product_name),
     description: String(row.description),
-    tariff: row.tariff === 'audit_plus' ? 'audit_plus' : 'audit',
+    tariff: normalizeTariff(row.tariff),
     productionCost: String(row.production_cost || ''),
     retailPrice: String(row.retail_price || ''),
     monthlyVolume: String(row.monthly_volume || ''),

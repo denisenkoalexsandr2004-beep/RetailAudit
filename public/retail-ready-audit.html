@@ -242,6 +242,42 @@ input.fi:focus,select.fs:focus,textarea.ft:focus{border-color:var(--coral);box-s
 input.fi.err,select.fs.err,textarea.ft.err{border-color:var(--red)}
 textarea.ft{resize:vertical;min-height:100px}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.phone-combo{position:relative;display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:start}
+.phone-country{position:relative}
+.phone-country-btn{
+  min-height:50px;border:1.5px solid var(--border);border-radius:8px;
+  background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:0 10px;font-family:var(--ff-h);font-size:13px;font-weight:800;cursor:pointer;
+  transition:border-color .2s,box-shadow .2s,transform .2s;
+}
+.phone-country-btn:hover,.phone-country-btn.open{border-color:var(--coral);box-shadow:0 14px 28px rgba(232,76,48,.12);transform:translateY(-1px)}
+.phone-country-dial{font-size:15px;line-height:1}
+.phone-country-flag{width:24px;height:16px;flex:0 0 auto;border:1px solid rgba(11,31,75,.16);border-radius:3px;box-shadow:0 2px 5px rgba(11,31,75,.08);display:block;object-fit:cover}
+.phone-country-panel{
+  position:absolute;top:calc(100% + 10px);left:0;width:260px;max-height:224px;overflow:auto;
+  border:1px solid rgba(232,76,48,.2);border-radius:16px;background:rgba(255,255,255,.98);
+  box-shadow:0 24px 54px rgba(11,31,75,.18);padding:8px;z-index:30;scroll-behavior:smooth;
+  scroll-snap-type:y proximity;animation:fadeUp .22s ease both;display:none;
+}
+.phone-country-panel.open{display:block}
+.phone-country-option{
+  width:100%;border:0;border-radius:12px;background:transparent;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;padding:10px 12px;color:var(--navy);cursor:pointer;scroll-snap-align:start;transition:background .18s,transform .18s
+}
+.phone-country-option:hover,.phone-country-option.active{background:rgba(232,76,48,.08);transform:translateX(2px)}
+.phone-country-meta{display:flex;align-items:center;gap:10px}
+.phone-country-meta strong{font-size:13px}
+.phone-country-code{color:var(--coral);font-family:var(--ff-h);font-size:13px;font-weight:900}
+.tariff-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.tariff-switch button{
+  border:1.5px solid var(--border);border-radius:14px;background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);
+  padding:16px 14px;font-family:var(--ff-h);font-size:13px;font-weight:900;color:var(--navy);cursor:pointer;transition:all .2s
+}
+.tariff-switch button:hover{transform:translateY(-2px);box-shadow:0 18px 34px rgba(11,31,75,.1)}
+.tariff-switch button.active{border-color:var(--coral);background:rgba(232,76,48,.08);color:var(--coral);box-shadow:0 16px 28px rgba(232,76,48,.12)}
+.tariff-note{font-size:12px;color:var(--gray);margin-bottom:18px}
+.tariff-note b{color:var(--navy-dark)}
 .fhint{font-size:11px;color:var(--gray);margin-top:4px}
 .ferr{font-size:11px;color:var(--red);margin-top:3px;display:block;min-height:16px}
 .voice-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;margin-top:10px;border:1px solid var(--border);border-radius:12px;padding:12px;background:#fbfcff}
@@ -278,6 +314,8 @@ textarea.ft{resize:vertical;min-height:100px}
 .btn-f:hover{background:var(--coral2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,76,48,.35)}
 .btn-bk{background:transparent;color:var(--navy-dark);border:1.5px solid var(--border);border-radius:8px;padding:12px 22px;font-family:var(--ff-h);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
 .btn-bk:hover{border-color:var(--navy);color:var(--navy)}
+#nav-back .btn-bk{color:var(--white);border-color:rgba(255,255,255,.24);background:rgba(255,255,255,.06)}
+#nav-back .btn-bk:hover{border-color:rgba(255,255,255,.56);color:var(--white);background:rgba(255,255,255,.12)}
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:var(--white);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px}
 
 /* ── THANKS ── */
@@ -294,7 +332,7 @@ textarea.ft{resize:vertical;min-height:100px}
 .tid{font-family:monospace;background:var(--light);padding:2px 8px;border-radius:4px;color:var(--coral);font-weight:700}
 
 @media(max-width:800px){
-  .hero-grid,.what-grid,.pgrid,.steps,.frow{grid-template-columns:1fr}
+  .hero-grid,.what-grid,.pgrid,.steps,.frow,.phone-combo,.tariff-switch{grid-template-columns:1fr}
   .hero-right{display:none}
   .trust-inner{gap:28px}
   nav{padding:0 20px}
@@ -572,7 +610,7 @@ textarea.ft{resize:vertical;min-height:100px}
           <li>Конкретный план доработки</li>
           <li>Консультация с экспертом Центра Закупок Сетей™ 30 мин</li>
         </ul>
-        <button class="btn-price" onclick="showForm()">Подать заявку →</button>
+        <button class="btn-price" onclick="showForm('audit')">Подать заявку →</button>
       </div>
       <div class="pcard ft">
         <div class="ribbon">Популярный</div>
@@ -587,7 +625,7 @@ textarea.ft{resize:vertical;min-height:100px}
           <li>Подготовка коммерческого предложения</li>
           <li>Сопровождение до заключения договора</li>
         </ul>
-        <button class="btn-price" onclick="showForm()">Подать заявку →</button>
+        <button class="btn-price" onclick="showForm('audit_plus')">Подать заявку →</button>
       </div>
     </div>
   </div>
@@ -641,7 +679,21 @@ textarea.ft{resize:vertical;min-height:100px}
             <div class="fg"><label class="flbl">Компания <sup>*</sup></label><input class="fi" id="f-company" placeholder="ООО «Название»"><span class="ferr" id="e-company"></span></div>
           </div>
           <div class="frow">
-            <div class="fg"><label class="flbl">Телефон <sup>*</sup></label><input class="fi" id="f-phone" placeholder="+7 916 000-00-00" type="tel"><span class="ferr" id="e-phone"></span></div>
+            <div class="fg">
+              <label class="flbl">Телефон <sup>*</sup></label>
+              <div class="phone-combo">
+                <div class="phone-country">
+                  <button class="phone-country-btn" id="phone-country-btn" type="button" onclick="togglePhoneCountryPanel()">
+                    <img class="phone-country-flag" id="phone-country-flag" src="https://flagcdn.com/w40/ru.png" alt="">
+                    <span class="phone-country-dial" id="phone-country-dial">+7</span>
+                  </button>
+                  <div class="phone-country-panel" id="phone-country-panel"></div>
+                </div>
+                <input class="fi" id="f-phone" placeholder="+7 916 000-00-00" type="tel">
+              </div>
+              <div class="fhint">Выберите страну, код подставится автоматически. Номер можно скорректировать вручную.</div>
+              <span class="ferr" id="e-phone"></span>
+            </div>
             <div class="fg"><label class="flbl">Telegram</label><input class="fi" id="f-telegram" placeholder="@username"><div class="fhint">Для быстрой связи с экспертом</div><span class="ferr" id="e-telegram"></span></div>
           </div>
         </div>
@@ -686,6 +738,12 @@ textarea.ft{resize:vertical;min-height:100px}
         </div>
         <div id="s2" style="display:none">
           <h2>Экономика</h2><div class="fsub">Цены и объём производства — ключевые данные для расчёта вероятности входа</div>
+          <div class="tariff-switch">
+            <button type="button" data-tariff="to_clarify" onclick="setTariff('to_clarify')">Уточнить тариф</button>
+            <button type="button" data-tariff="audit" onclick="setTariff('audit')">Аудит · 50 000 ₽</button>
+            <button type="button" data-tariff="audit_plus" onclick="setTariff('audit_plus')">Аудит + переговоры · 150 000 ₽</button>
+          </div>
+          <div class="tariff-note">В заявке сохранится: <b id="tariff-note-value">Уточнить тариф</b></div>
           <div class="frow">
             <div class="fg"><label class="flbl">Цена товара, ₽</label><input class="fi" id="f-price" placeholder="89" type="number" min="0"><div class="fhint">Цена товара для расчёта экономики входа</div><span class="ferr" id="e-price"></span></div>
             <div class="fg"><label class="flbl">РРЦ (цена на полке), ₽</label><input class="fi" id="f-rrp" placeholder="89" type="number" min="0"><div class="fhint">Рекомендованная розничная цена</div><span class="ferr" id="e-rrp"></span></div>
@@ -742,6 +800,25 @@ textarea.ft{resize:vertical;min-height:100px}
 
 <script>
 var step=0;
+var selectedTariff='to_clarify';
+var selectedPhoneCountry={code:'RU',dial:'+7',flagUrl:'https://flagcdn.com/w40/ru.png',label:'Россия'};
+var phoneCountries=[
+  {code:'RU',dial:'+7',flagUrl:'https://flagcdn.com/w40/ru.png',label:'Россия'},
+  {code:'BY',dial:'+375',flagUrl:'https://flagcdn.com/w40/by.png',label:'Беларусь'},
+  {code:'KZ',dial:'+7',flagUrl:'https://flagcdn.com/w40/kz.png',label:'Казахстан'},
+  {code:'UZ',dial:'+998',flagUrl:'https://flagcdn.com/w40/uz.png',label:'Узбекистан'},
+  {code:'KG',dial:'+996',flagUrl:'https://flagcdn.com/w40/kg.png',label:'Кыргызстан'},
+  {code:'AM',dial:'+374',flagUrl:'https://flagcdn.com/w40/am.png',label:'Армения'},
+  {code:'AZ',dial:'+994',flagUrl:'https://flagcdn.com/w40/az.png',label:'Азербайджан'},
+  {code:'GE',dial:'+995',flagUrl:'https://flagcdn.com/w40/ge.png',label:'Грузия'},
+  {code:'TJ',dial:'+992',flagUrl:'https://flagcdn.com/w40/tj.png',label:'Таджикистан'},
+  {code:'MD',dial:'+373',flagUrl:'https://flagcdn.com/w40/md.png',label:'Молдова'}
+];
+function tariffLabel(value){
+  if(value==='audit_plus')return 'Аудит + переговоры';
+  if(value==='audit')return 'Аудит';
+  return 'Уточнить тариф';
+}
 function showLanding(){
   document.getElementById('pg-landing').style.display='block';
   document.getElementById('pg-form').style.display='none';
@@ -749,13 +826,15 @@ function showLanding(){
   document.getElementById('nav-main').style.display='flex';
   document.getElementById('nav-back').style.display='none';
   window.scrollTo(0,0);
+  closePhoneCountryPanel();
 }
-function showForm(){
+function showForm(tariff){
   document.getElementById('pg-landing').style.display='none';
   document.getElementById('pg-form').style.display='block';
   document.getElementById('pg-thanks').style.display='none';
   document.getElementById('nav-main').style.display='none';
   document.getElementById('nav-back').style.display='flex';
+  setTariff(tariff||'to_clarify');
   var consent=document.getElementById('f-consent');
   var consentBox=document.getElementById('consent-box');
   if(consent)consent.checked=false;
@@ -769,6 +848,7 @@ function showThanks(id){
   document.getElementById('nav-main').style.display='none';
   document.getElementById('nav-back').style.display='flex';
   document.getElementById('app-id').textContent=id;
+  closePhoneCountryPanel();
   window.scrollTo(0,0);
 }
 function scrollPhotos(direction){
@@ -799,6 +879,7 @@ function renderStep(){
   document.getElementById('btn-nx').textContent=step<2?'Далее →':'Отправить заявку →';
   var consentBox=document.getElementById('consent-box');
   if(consentBox)consentBox.style.display=step===0?'flex':'none';
+  syncTariffUi();
 }
 function gv(id){return(document.getElementById(id)||{}).value||'';}
 function se(id,msg){
@@ -814,6 +895,70 @@ function setFormStatus(msg){
   el.className='form-status'+(msg?' error':'');
 }
 function clean(v){return (v||'').trim().replace(/\s+/g,' ');}
+function applyDialCode(current,nextDial,previousDial){
+  var value=clean(current);
+  if(!value)return nextDial+' ';
+  if(previousDial&&value.indexOf(previousDial)===0){
+    var rest=value.slice(previousDial.length).replace(/^\s+/,'');
+    return nextDial+(rest?' '+rest:' ');
+  }
+  if(value.charAt(0)!=='+')return nextDial+' '+value;
+  return value;
+}
+function renderPhoneCountries(){
+  var panel=document.getElementById('phone-country-panel');
+  if(!panel)return;
+  panel.innerHTML='';
+  phoneCountries.forEach(function(country){
+    var btn=document.createElement('button');
+    btn.type='button';
+    btn.className='phone-country-option'+(selectedPhoneCountry.code===country.code?' active':'');
+    btn.innerHTML='<span class="phone-country-meta"><img class="phone-country-flag" src="'+country.flagUrl+'" alt=""><strong>'+country.label+'</strong></span><span class="phone-country-code">'+country.dial+'</span>';
+    btn.onclick=function(){selectPhoneCountry(country.code);};
+    panel.appendChild(btn);
+  });
+}
+function updatePhoneCountryButton(){
+  var flag=document.getElementById('phone-country-flag');
+  var dial=document.getElementById('phone-country-dial');
+  if(flag)flag.src=selectedPhoneCountry.flagUrl;
+  if(dial)dial.textContent=selectedPhoneCountry.dial;
+}
+function selectPhoneCountry(code){
+  var next=phoneCountries.find(function(country){return country.code===code;});
+  if(!next)return;
+  var phone=document.getElementById('f-phone');
+  if(phone)phone.value=applyDialCode(phone.value,next.dial,selectedPhoneCountry.dial);
+  selectedPhoneCountry=next;
+  updatePhoneCountryButton();
+  renderPhoneCountries();
+  closePhoneCountryPanel();
+}
+function togglePhoneCountryPanel(){
+  var panel=document.getElementById('phone-country-panel');
+  var btn=document.getElementById('phone-country-btn');
+  if(!panel||!btn)return;
+  var open=!panel.classList.contains('open');
+  panel.classList.toggle('open',open);
+  btn.classList.toggle('open',open);
+}
+function closePhoneCountryPanel(){
+  var panel=document.getElementById('phone-country-panel');
+  var btn=document.getElementById('phone-country-btn');
+  if(panel)panel.classList.remove('open');
+  if(btn)btn.classList.remove('open');
+}
+function setTariff(value){
+  selectedTariff=value==='audit_plus'||value==='audit'?value:'to_clarify';
+  syncTariffUi();
+}
+function syncTariffUi(){
+  document.querySelectorAll('.tariff-switch button').forEach(function(btn){
+    btn.classList.toggle('active',btn.getAttribute('data-tariff')===selectedTariff);
+  });
+  var note=document.getElementById('tariff-note-value');
+  if(note)note.textContent=tariffLabel(selectedTariff);
+}
 function lettersOnly(v){return clean(v).replace(/[^A-Za-zА-Яа-яЁё]/g,'');}
 function hasEnoughLetters(v,min){return lettersOnly(v).length>=min;}
 function looksLikeNoise(v){
@@ -1082,6 +1227,7 @@ async function fNext(){
   var d={
     name:clean(gv('f-name')),company:clean(gv('f-company')),phone:clean(gv('f-phone')),telegram:clean(gv('f-telegram')),
     category:clean(gv('f-cat')),product_name:clean(gv('f-prod')),description:clean(gv('f-desc')),
+    tariff:selectedTariff,
     price:clean(gv('f-price')),rrp:clean(gv('f-rrp')),volume:clean(gv('f-vol')),answer:clean(gv('f-ans')),
     federalNetworks:selectedNetworks.federal.join(', '),regionalNetworks:selectedNetworks.regional.join(', '),localNetworks:selectedNetworks.local.join(', '),unknownNetworks:'',
     networkNames:combinedNetworkNames(),
@@ -1113,8 +1259,22 @@ if(consentInput){
     }
   });
 }
+document.addEventListener('click',function(event){
+  var wrapper=document.querySelector('.phone-country');
+  if(wrapper&&!wrapper.contains(event.target))closePhoneCountryPanel();
+});
+renderPhoneCountries();
+updatePhoneCountryButton();
+syncTariffUi();
 renderNetworkList();
 renderSelectedNetworks();
+var query=new URLSearchParams(window.location.search);
+if(query.get('view')==='form'){
+  showForm(query.get('tariff')||'to_clarify');
+  var screenStep=Number(query.get('step')||'0');
+  if(Number.isFinite(screenStep)&&screenStep>=0&&screenStep<=2){step=screenStep;renderStep();}
+  if(query.get('countryOpen')==='1')togglePhoneCountryPanel();
+}
 </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { getTariffLabel, type TariffCode } from '@/lib/tariffs';
 
 type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
 
@@ -14,7 +15,7 @@ type Application = {
   category: string;
   productName: string;
   description: string;
-  tariff: 'audit' | 'audit_plus';
+  tariff: TariffCode;
   status: ApplicationStatus;
   telegramStatus: 'sent' | 'failed' | 'not_configured';
   createdAt: string;
@@ -35,9 +36,9 @@ type Application = {
 };
 
 const statusFlow: Array<{ value: ApplicationStatus; label: string }> = [
-  { value: 'new', label: 'Новое' },
+  { value: 'new', label: 'Новая' },
   { value: 'invoice_sent', label: 'Выставили счёт' },
-  { value: 'paid_in_work', label: 'Счёт оплачен в работе' },
+  { value: 'paid_in_work', label: 'Счёт оплачен, в работе' },
   { value: 'completed', label: 'Завершена' },
   { value: 'rejected', label: 'Отказ' }
 ];
@@ -188,7 +189,7 @@ export default function AdminApplicationsPage() {
     ];
     const rows = applications.map((application) => columns.map(([key]) => {
       if (key === 'statusLabel') return csvEscape(statusLabels[application.status] || application.status);
-      if (key === 'tariffLabel') return csvEscape(application.tariff === 'audit_plus' ? 'Аудит + переговоры' : 'Аудит');
+      if (key === 'tariffLabel') return csvEscape(getTariffLabel(application.tariff));
       return csvEscape(application[key]);
     }).join(';'));
     const csv = [columns.map(([, title]) => csvEscape(title)).join(';'), ...rows].join('\r\n');
@@ -345,7 +346,7 @@ export default function AdminApplicationsPage() {
                   <h3>О компании</h3>
                   <div className="adminExactGrid">
                     <div><span>Компания</span><b>{selected.company}</b></div>
-                    <div><span>Тариф</span><b>{selected.tariff === 'audit_plus' ? 'Аудит + переговоры' : 'Аудит'}</b></div>
+                    <div><span>Тариф</span><b>{getTariffLabel(selected.tariff)}</b></div>
                     <div><span>Telegram-уведомление</span><b>{telegramLabels[selected.telegramStatus]}</b></div>
                     <div><span>Федеральные сети</span><b>{selected.federalNetworks || '-'}</b></div>
                     <div><span>Региональные сети</span><b>{selected.regionalNetworks || '-'}</b></div>

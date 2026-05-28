@@ -8,7 +8,7 @@ create table if not exists public.applications (
   category text not null,
   product_name text not null,
   description text not null,
-  tariff text not null check (tariff in ('audit', 'audit_plus')),
+  tariff text not null check (tariff in ('to_clarify', 'audit', 'audit_plus')),
   production_cost text,
   retail_price text,
   monthly_volume text,
@@ -61,6 +61,24 @@ update public.applications set status = 'invoice_sent' where status in ('waiting
 alter table public.applications
   add constraint applications_status_check
   check (status in ('new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'));
+
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conname = 'applications_tariff_check'
+      and conrelid = 'public.applications'::regclass
+  ) then
+    alter table public.applications drop constraint applications_tariff_check;
+  end if;
+exception
+  when undefined_object then null;
+end $$;
+
+alter table public.applications
+  add constraint applications_tariff_check
+  check (tariff in ('to_clarify', 'audit', 'audit_plus'));
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (

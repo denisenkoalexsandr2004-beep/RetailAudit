@@ -1,4 +1,11 @@
 import type { ApplicationInput } from './validation';
+import { normalizeTariff } from './tariffs';
+import {
+  createApplication as createSqliteApplication,
+  listApplications as listSqliteApplications,
+  updateApplicationStatus as updateSqliteApplicationStatus,
+  updateTelegramStatus as updateSqliteTelegramStatus
+} from './db';
 
 export type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
 
@@ -106,7 +113,7 @@ function fromRow(row: SupabaseApplicationRow): ApplicationRecord {
     category: row.category,
     productName: row.product_name,
     description: row.description,
-    tariff: row.tariff === 'audit_plus' ? 'audit_plus' : 'audit',
+    tariff: normalizeTariff(row.tariff),
     productionCost: row.production_cost || '',
     retailPrice: row.retail_price || '',
     monthlyVolume: row.monthly_volume || '',
@@ -138,6 +145,10 @@ function supabaseConfig() {
   }
 
   return { url, key };
+}
+
+function hasSupabaseConfig() {
+  return Boolean(process.env.SUPABASE_URL && (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY));
 }
 
 async function supabaseRequest<T>(path: string, init: RequestInit = {}) {
@@ -207,6 +218,8 @@ async function uploadSupabasePresentation(application: ApplicationRecord) {
 }
 
 export async function createApplication(data: ApplicationInput) {
+  if (!hasSupabaseConfig()) return createSqliteApplication(data);
+
   const application = await uploadSupabasePresentation(createRecord(data));
   const rows = await supabaseRequest<SupabaseApplicationRow[]>('applications?select=*', {
     method: 'POST',
@@ -218,11 +231,18 @@ export async function createApplication(data: ApplicationInput) {
 }
 
 export async function listApplications() {
+  if (!hasSupabaseConfig()) return listSqliteApplications();
+
   const rows = await supabaseRequest<SupabaseApplicationRow[]>('applications?select=*&order=created_at.desc&limit=300');
   return rows.map(fromRow);
 }
 
 export async function updateTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
+  if (!hasSupabaseConfig()) {
+    updateSqliteTelegramStatus(id, status);
+    return;
+  }
+
   await supabaseRequest<null>(`applications?id=eq.${encodeURIComponent(id)}`, {
     method: 'PATCH',
     headers: { Prefer: 'return=minimal' },
@@ -231,6 +251,8 @@ export async function updateTelegramStatus(id: string, status: ApplicationRecord
 }
 
 export async function updateApplicationStatus(id: string, status: ApplicationStatus) {
+  if (!hasSupabaseConfig()) return updateSqliteApplicationStatus(id, status);
+
   const rows = await supabaseRequest<SupabaseApplicationRow[]>(`applications?id=eq.${encodeURIComponent(id)}&select=*`, {
     method: 'PATCH',
     headers: { Prefer: 'return=representation' },

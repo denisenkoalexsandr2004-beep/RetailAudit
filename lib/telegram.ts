@@ -1,4 +1,5 @@
 import type { ApplicationRecord } from './db';
+import { getTariffLabel } from './tariffs';
 
 function escapeHtml(value: string) {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -39,7 +40,7 @@ async function postTelegramMessage(text: string) {
 }
 
 export async function sendApplicationToTelegram(application: ApplicationRecord) {
-  const tariff = application.tariff === 'audit_plus' ? 'Аудит + переговоры · 150 000 ₽' : 'Аудит · 50 000 ₽';
+  const tariff = getTariffLabel(application.tariff, true);
   const networkLevel = {
     federal: 'Федеральные',
     regional: 'Региональные',

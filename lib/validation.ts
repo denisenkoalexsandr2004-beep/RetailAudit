@@ -1,3 +1,6 @@
+import type { TariffCode } from './tariffs';
+import { normalizeTariff } from './tariffs';
+
 export type ApplicationInput = {
   name: string;
   company: string;
@@ -7,7 +10,7 @@ export type ApplicationInput = {
   category: string;
   productName: string;
   description: string;
-  tariff: 'audit' | 'audit_plus';
+  tariff: TariffCode;
   productionCost?: string;
   retailPrice?: string;
   monthlyVolume?: string;
@@ -237,7 +240,7 @@ export function validateApplication(payload: unknown): ValidationResult {
     category: clean(raw.category, maxLengths.category),
     productName: clean(raw.productName || raw.product_name, maxLengths.productName),
     description: clean(raw.description, maxLengths.description),
-    tariff: raw.tariff === 'audit_plus' ? 'audit_plus' : 'audit',
+    tariff: normalizeTariff(raw.tariff),
     productionCost: clean(raw.productionCost || raw.price, maxLengths.productionCost),
     retailPrice: clean(raw.retailPrice || raw.rrp, maxLengths.retailPrice),
     monthlyVolume: clean(raw.monthlyVolume || raw.volume, maxLengths.monthlyVolume),

@@ -212,6 +212,117 @@ input, select, textarea {
   outline: none;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(232,76,48,.1); }
+.phoneField { position: relative; }
+.phoneCombo {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.countryTrigger {
+  min-height: 52px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.countryTrigger b { font-family: Montserrat, Arial, sans-serif; font-size: 15px; line-height: 1; }
+.countryFlag {
+  width: 24px;
+  height: 16px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(11,31,75,.16);
+  border-radius: 3px;
+  box-shadow: 0 2px 5px rgba(11,31,75,.08);
+  display: block;
+  object-fit: cover;
+}
+.countryTrigger.open,
+.countryTrigger:hover {
+  border-color: var(--coral);
+  box-shadow: 0 14px 28px rgba(232,76,48,.12);
+  transform: translateY(-1px);
+}
+.countryPanel {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 260px;
+  max-height: 224px;
+  overflow: auto;
+  border: 1px solid rgba(232,76,48,.18);
+  border-radius: 16px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 24px 54px rgba(11,31,75,.18);
+  padding: 8px;
+  z-index: 20;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  animation: fadeUp .22s ease both;
+}
+.countryPanel::after {
+  content: "";
+  position: sticky;
+  left: 0;
+  bottom: -8px;
+  display: block;
+  height: 20px;
+  margin: 0 -8px -8px;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.96) 100%);
+  pointer-events: none;
+}
+.countryOption {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--navy);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: background .18s ease, transform .18s ease;
+}
+.countryOption:hover,
+.countryOption.selected {
+  background: var(--coral-soft);
+  transform: translateX(2px);
+}
+.countryMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.countryMeta strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+.countryDial {
+  color: var(--coral);
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+}
+.countryHint {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
 .honeypotField {
   position: absolute;
   left: -10000px;
@@ -221,17 +332,28 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   overflow: hidden;
 }
 .fullField { margin-top: 18px; }
-.tariffSwitch { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.tariffSwitch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 12px; }
 .tariffSwitch button {
   border: 1.5px solid var(--border);
-  border-radius: 10px;
-  background: var(--white);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff 0%, #f8fbff 100%);
   padding: 18px;
   font-weight: 900;
   color: var(--navy);
   cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
-.tariffSwitch .selected { border-color: var(--coral); background: var(--coral-soft); color: var(--coral); }
+.tariffSwitch button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(11,31,75,.1);
+}
+.tariffSwitch .selected { border-color: var(--coral); background: var(--coral-soft); color: var(--coral); box-shadow: 0 16px 28px rgba(232,76,48,.12); }
+.tariffHint {
+  margin-bottom: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.tariffHint b { color: var(--navy); }
 .formActions { display: flex; justify-content: space-between; margin-top: 28px; padding-top: 22px; border-top: 1px solid var(--border); }
 .formError {
   margin-top: 18px;
@@ -703,6 +825,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   .section, .formShell, .adminShell { padding-left: 20px; padding-right: 20px; }
   .formCard { padding: 22px; }
   .progressTabs, .tariffSwitch, .adminHeader { width: 100%; display: grid; grid-template-columns: 1fr; }
+  .phoneCombo { grid-template-columns: 1fr; }
 }
 
 /* Variant-inspired landing */
