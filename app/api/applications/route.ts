@@ -4,6 +4,8 @@ import { applyCors, corsPreflight, rateLimit, readJsonBody } from '@/lib/securit
 import { sendApplicationToTelegram } from '@/lib/telegram';
 import { validateApplication, verifyCaptcha } from '@/lib/validation';
 
+export const runtime = 'nodejs';
+
 export function OPTIONS(request: Request) {
   return corsPreflight(request);
 }
@@ -30,7 +32,8 @@ export async function POST(request: Request) {
   let application;
   try {
     application = await createApplication(validation.data);
-  } catch {
+  } catch (error) {
+    console.error('Application create failed', error);
     return applyCors(NextResponse.json({ message: 'Заявка временно не принята. Попробуйте позже.' }, { status: 500 }), request);
   }
 
@@ -40,7 +43,12 @@ export async function POST(request: Request) {
   } catch {
     telegramStatus = 'failed';
   }
-  await updateTelegramStatus(application.id, telegramStatus);
+  try {
+    await updateTelegramStatus(application.id, telegramStatus);
+  } catch (error) {
+    console.error('Telegram status update failed', error);
+    telegramStatus = 'failed';
+  }
 
   return applyCors(NextResponse.json({
     id: application.id,

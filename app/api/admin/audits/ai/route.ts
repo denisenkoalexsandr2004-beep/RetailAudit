@@ -4,6 +4,8 @@ import { generateAIAuditDraft } from '@/lib/ai-audit';
 import { adminRateLimit, corsPreflight, readJsonBody } from '@/lib/security';
 import { getApplication, upsertAudit } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
 export function OPTIONS(request: NextRequest) {
   return corsPreflight(request);
 }

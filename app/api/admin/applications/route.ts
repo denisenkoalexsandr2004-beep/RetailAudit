@@ -3,6 +3,8 @@ import { isAdminRequest } from '@/lib/auth';
 import { adminRateLimit, corsPreflight, readJsonBody } from '@/lib/security';
 import { listApplications, updateApplicationStatus, type ApplicationStatus } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
 const statuses = new Set<ApplicationStatus>(['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected']);
 
 export function OPTIONS(request: NextRequest) {

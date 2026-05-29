@@ -3,6 +3,8 @@ import { isAdminRequest } from '@/lib/auth';
 import { adminRateLimit } from '@/lib/security';
 import { sendTelegramTestMessage } from '@/lib/telegram';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   if (process.env.NODE_ENV === 'production' && process.env.ENABLE_TELEGRAM_TEST !== 'true') {
     return NextResponse.json({ message: 'Not found.' }, { status: 404 });

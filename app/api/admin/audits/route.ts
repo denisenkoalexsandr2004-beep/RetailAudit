@@ -4,6 +4,8 @@ import { generateAuditDraft } from '@/lib/audit-methodology';
 import { adminRateLimit, corsPreflight, readJsonBody } from '@/lib/security';
 import { getApplication, getAuditByApplicationId, updateAudit, upsertAudit, type AuditRecord } from '@/lib/storage';
 
+export const runtime = 'nodejs';
+
 const statuses = new Set<AuditRecord['status']>(['draft', 'expert_review', 'approved']);
 
 export function OPTIONS(request: NextRequest) {

@@ -43,8 +43,12 @@ type JsonStore = {
 
 function dbPath() {
   const configured = process.env.DATABASE_PATH || './data/retail_ready_audit.db';
-  const filename = path.basename(configured);
-  return path.join(process.cwd(), 'data', filename || 'retail_ready_audit.db');
+  if (path.isAbsolute(configured)) return configured;
+  if (configured !== './data/retail_ready_audit.db') return path.resolve(process.cwd(), configured);
+  const baseDir = process.env.RETAIL_AUDIT_DATA_DIR
+    || process.env.DATA_DIR
+    || (process.env.NODE_ENV === 'production' ? path.join('/tmp', 'retail_ready_audit') : path.join(process.cwd(), 'data'));
+  return path.join(baseDir, 'retail_ready_audit.db');
 }
 
 function jsonPath() {

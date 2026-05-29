@@ -844,10 +844,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
     grid-template-columns: 1fr;
   }
   .hero { padding: 52px 20px; }
-  .section, .formShell, .adminShell { padding-left: 20px; padding-right: 20px; }
+  .section, .adminShell { padding-left: 20px; padding-right: 20px; }
+  .formShell { padding: 32px 20px calc(108px + env(safe-area-inset-bottom)); }
   .formCard { padding: 22px; }
   .progressTabs, .tariffSwitch, .adminHeader { width: 100%; display: grid; grid-template-columns: 1fr; }
-  .phoneCombo { grid-template-columns: 1fr; }
+  .phoneCombo { grid-template-columns: 78px minmax(0, 1fr); height: 52px; min-height: 52px; }
+  .countryTrigger, .phoneCombo input { height: 52px; min-height: 52px; }
+  .countryPanel { width: min(300px, calc(100vw - 54px)); max-height: 280px; }
+  .formActions { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .formActions button, .formActions a { width: 100%; min-height: 56px; }
 }
 
 /* Variant-inspired landing */

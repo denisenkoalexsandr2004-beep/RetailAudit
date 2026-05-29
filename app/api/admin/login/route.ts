@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAdminToken, validateAdminCredentials } from '@/lib/auth';
 import { adminRateLimit, readJsonBody } from '@/lib/security';
 
+export const runtime = 'nodejs';
+
 export async function POST(request: NextRequest) {
   const limited = adminRateLimit(request);
   if (limited) return limited;
