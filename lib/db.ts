@@ -34,6 +34,12 @@ type SqliteDatabase = {
 };
 
 let db: SqliteDatabase | null = null;
+let sqliteAvailable: boolean | null = null;
+
+type JsonStore = {
+  applications: ApplicationRecord[];
+  audits: AuditRecord[];
+};
 
 function dbPath() {
   const configured = process.env.DATABASE_PATH || './data/retail_ready_audit.db';
@@ -41,8 +47,64 @@ function dbPath() {
   return path.join(process.cwd(), 'data', filename || 'retail_ready_audit.db');
 }
 
+function jsonPath() {
+  return dbPath().replace(/\.[^.]+$/, '') + '.json';
+}
+
+function canUseSqlite() {
+  if (sqliteAvailable !== null) return sqliteAvailable;
+  try {
+    const nativeRequire = eval('require') as NodeRequire;
+    nativeRequire('node:sqlite');
+    sqliteAvailable = true;
+  } catch {
+    sqliteAvailable = false;
+  }
+  return sqliteAvailable;
+}
+
+function readStore(): JsonStore {
+  const file = jsonPath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  if (!fs.existsSync(file)) {
+    return { applications: [], audits: [] };
+  }
+
+  try {
+    const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Partial<JsonStore>;
+    return {
+      applications: Array.isArray(parsed.applications) ? parsed.applications : [],
+      audits: Array.isArray(parsed.audits) ? parsed.audits : []
+    };
+  } catch {
+    return { applications: [], audits: [] };
+  }
+}
+
+function writeStore(store: JsonStore) {
+  const file = jsonPath();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(store, null, 2));
+}
+
+function normalizeApplicationRecord(record: ApplicationRecord): ApplicationRecord {
+  return {
+    ...record,
+    tariff: normalizeTariff(record.tariff),
+    status: ['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'].includes(record.status)
+      ? record.status
+      : 'new',
+    telegramStatus: ['sent', 'failed', 'not_configured'].includes(record.telegramStatus)
+      ? record.telegramStatus
+      : 'not_configured'
+  };
+}
+
 export function getDb() {
   if (db) return db;
+  if (!canUseSqlite()) {
+    throw new Error('node:sqlite is unavailable; JSON storage fallback is active');
+  }
   const file = dbPath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const nativeRequire = eval('require') as NodeRequire;
@@ -188,6 +250,21 @@ function mapAudit(row: Record<string, unknown>): AuditRecord {
 export function createApplication(data: ApplicationInput) {
   const now = new Date().toISOString();
   const id = `RRA-${Date.now().toString(36).toUpperCase()}`;
+  if (!canUseSqlite()) {
+    const store = readStore();
+    const application = normalizeApplicationRecord({
+      ...data,
+      id,
+      status: 'new',
+      telegramStatus: 'not_configured',
+      createdAt: now,
+      updatedAt: now
+    });
+    store.applications.unshift(application);
+    writeStore(store);
+    return application;
+  }
+
   getDb()
     .prepare(`
       INSERT INTO applications (
@@ -235,12 +312,30 @@ export function createApplication(data: ApplicationInput) {
 }
 
 export function updateTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
+  if (!canUseSqlite()) {
+    const store = readStore();
+    store.applications = store.applications.map((application) => application.id === id
+      ? normalizeApplicationRecord({ ...application, telegramStatus: status, updatedAt: new Date().toISOString() })
+      : application);
+    writeStore(store);
+    return;
+  }
+
   getDb()
     .prepare('UPDATE applications SET telegram_status = ?, updated_at = ? WHERE id = ?')
     .run(status, new Date().toISOString(), id);
 }
 
 export function updateApplicationStatus(id: string, status: ApplicationStatus) {
+  if (!canUseSqlite()) {
+    const store = readStore();
+    store.applications = store.applications.map((application) => application.id === id
+      ? normalizeApplicationRecord({ ...application, status, updatedAt: new Date().toISOString() })
+      : application);
+    writeStore(store);
+    return getApplication(id);
+  }
+
   getDb()
     .prepare('UPDATE applications SET status = ?, updated_at = ? WHERE id = ?')
     .run(status, new Date().toISOString(), id);
@@ -248,16 +343,34 @@ export function updateApplicationStatus(id: string, status: ApplicationStatus) {
 }
 
 export function getApplication(id: string) {
+  if (!canUseSqlite()) {
+    const application = readStore().applications.find((item) => item.id === id);
+    return application ? normalizeApplicationRecord(application) : null;
+  }
+
   const row = getDb().prepare('SELECT * FROM applications WHERE id = ?').get(id) as Record<string, unknown> | undefined;
   return row ? map(row) : null;
 }
 
 export function listApplications() {
+  if (!canUseSqlite()) {
+    return readStore().applications
+      .map(normalizeApplicationRecord)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 300);
+  }
+
   const rows = getDb().prepare('SELECT * FROM applications ORDER BY created_at DESC LIMIT 300').all() as Record<string, unknown>[];
   return rows.map(map);
 }
 
 export function getAuditByApplicationId(applicationId: string) {
+  if (!canUseSqlite()) {
+    return readStore().audits
+      .filter((audit) => audit.applicationId === applicationId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0] || null;
+  }
+
   const row = getDb()
     .prepare('SELECT * FROM audits WHERE application_id = ? ORDER BY updated_at DESC LIMIT 1')
     .get(applicationId) as Record<string, unknown> | undefined;
@@ -265,6 +378,37 @@ export function getAuditByApplicationId(applicationId: string) {
 }
 
 export function upsertAudit(applicationId: string, draft: AuditDraft, status: AuditRecord['status'] = 'draft') {
+  if (!canUseSqlite()) {
+    const store = readStore();
+    const now = new Date().toISOString();
+    const existing = store.audits
+      .filter((audit) => audit.applicationId === applicationId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+    if (existing) {
+      const updated = {
+        ...existing,
+        ...draft,
+        status,
+        updatedAt: now
+      };
+      store.audits = store.audits.map((audit) => audit.id === existing.id ? updated : audit);
+      writeStore(store);
+      return updated;
+    }
+
+    const audit: AuditRecord = {
+      ...draft,
+      id: `AUD-${Date.now().toString(36).toUpperCase()}`,
+      applicationId,
+      status,
+      createdAt: now,
+      updatedAt: now
+    };
+    store.audits.unshift(audit);
+    writeStore(store);
+    return audit;
+  }
+
   const existing = getAuditByApplicationId(applicationId);
   const now = new Date().toISOString();
   const args = [
@@ -304,6 +448,22 @@ export function upsertAudit(applicationId: string, draft: AuditDraft, status: Au
 }
 
 export function updateAudit(audit: Pick<AuditRecord, 'id' | 'status' | 'overallScore' | 'readinessLevel' | 'verdict' | 'summary' | 'blocks' | 'recommendations' | 'roadmap'>) {
+  if (!canUseSqlite()) {
+    const store = readStore();
+    let updatedAudit: AuditRecord | null = null;
+    store.audits = store.audits.map((existing) => {
+      if (existing.id !== audit.id) return existing;
+      updatedAudit = {
+        ...existing,
+        ...audit,
+        updatedAt: new Date().toISOString()
+      };
+      return updatedAudit;
+    });
+    writeStore(store);
+    return updatedAudit;
+  }
+
   getDb()
     .prepare(`
       UPDATE audits
