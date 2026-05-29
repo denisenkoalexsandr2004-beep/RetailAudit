@@ -1284,13 +1284,6 @@ updatePhoneCountryButton();
 syncTariffUi();
 renderNetworkList();
 renderSelectedNetworks();
-var query=new URLSearchParams(window.location.search);
-if(query.get('view')==='form'){
-  showForm(query.get('tariff')||'to_clarify');
-  var screenStep=Number(query.get('step')||'0');
-  if(Number.isFinite(screenStep)&&screenStep>=0&&screenStep<=2){step=screenStep;renderStep();}
-  if(query.get('countryOpen')==='1')togglePhoneCountryPanel();
-}
 </script>
 </body>
 </html>
