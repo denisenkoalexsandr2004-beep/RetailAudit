@@ -176,6 +176,26 @@ export default function AuditStudioPage() {
     }
   }
 
+  async function generateAi() {
+    setWorking(true);
+    setError('');
+    setMessage('');
+    try {
+      const data = await request('/api/admin/audits/ai', {
+        method: 'POST',
+        body: JSON.stringify({ applicationId })
+      });
+      setApplication(data.application || null);
+      setAudit(data.audit || null);
+      setActiveBlockId(data.audit?.blocks?.[0]?.id || '');
+      setMessage('AI-аудит сформирован. Проверьте выводы экспертом перед отправкой поставщику.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Не удалось сформировать AI-аудит.');
+    } finally {
+      setWorking(false);
+    }
+  }
+
   async function save(nextAudit = audit) {
     if (!nextAudit) return;
     setWorking(true);
@@ -364,6 +384,7 @@ export default function AuditStudioPage() {
                     <select value={audit.status} onChange={(event) => updateAudit({ ...audit, status: event.target.value as Audit['status'] })}>
                       {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                     </select>
+                    <button className="auditStudioAiButton" type="button" onClick={generateAi} disabled={working}>AI-аудит</button>
                     <button type="button" onClick={generate} disabled={working}>Пересобрать</button>
                     <button type="button" onClick={() => save()} disabled={working}>{working ? 'Сохраняю...' : 'Сохранить'}</button>
                     <button className="auditStudioPresentationButton" type="button" onClick={openPresentation} disabled={working}>

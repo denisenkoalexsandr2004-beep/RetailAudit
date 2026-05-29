@@ -3419,6 +3419,12 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   background: rgba(255,255,255,.14);
 }
 
+.auditStudioActions .auditStudioAiButton {
+  background: linear-gradient(135deg, #ff6a32, #f2b705);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(232,76,48,.2);
+}
+
 .auditStudioPresentationButton {
   background: #ffffff;
   color: var(--ae-navy-dark);
