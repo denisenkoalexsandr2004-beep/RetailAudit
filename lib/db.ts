@@ -44,7 +44,15 @@ type JsonStore = {
 function dbPath() {
   const configured = process.env.DATABASE_PATH || './data/retail_ready_audit.db';
   if (path.isAbsolute(configured)) return configured;
-  if (configured !== './data/retail_ready_audit.db') return path.resolve(process.cwd(), configured);
+  const defaultRelativePaths = new Set([
+    './data/retail_ready_audit.db',
+    'data/retail_ready_audit.db',
+    '.\\data\\retail_ready_audit.db',
+    'data\\retail_ready_audit.db'
+  ]);
+  if (process.env.NODE_ENV !== 'production' && !defaultRelativePaths.has(configured)) {
+    return path.resolve(process.cwd(), configured);
+  }
   const baseDir = process.env.RETAIL_AUDIT_DATA_DIR
     || process.env.DATA_DIR
     || (process.env.NODE_ENV === 'production' ? path.join('/tmp', 'retail_ready_audit') : path.join(process.cwd(), 'data'));
@@ -89,6 +97,11 @@ function writeStore(store: JsonStore) {
   const file = jsonPath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, JSON.stringify(store, null, 2));
+}
+
+function disableSqlite() {
+  sqliteAvailable = false;
+  db = null;
 }
 
 function normalizeApplicationRecord(record: ApplicationRecord): ApplicationRecord {
@@ -254,7 +267,8 @@ function mapAudit(row: Record<string, unknown>): AuditRecord {
 export function createApplication(data: ApplicationInput) {
   const now = new Date().toISOString();
   const id = `RRA-${Date.now().toString(36).toUpperCase()}`;
-  if (!canUseSqlite()) {
+
+  const createInJsonStore = () => {
     const store = readStore();
     const application = normalizeApplicationRecord({
       ...data,
@@ -267,52 +281,61 @@ export function createApplication(data: ApplicationInput) {
     store.applications.unshift(application);
     writeStore(store);
     return application;
+  };
+
+  if (!canUseSqlite()) {
+    return createInJsonStore();
   }
 
-  getDb()
-    .prepare(`
-      INSERT INTO applications (
-        id, name, company, phone, telegram, email, category, product_name, description,
-        tariff, production_cost, retail_price, monthly_volume, target_networks,
-        network_level, network_names, federal_networks, regional_networks, local_networks, unknown_networks,
-        presentation_url, presentation_name, presentation_type, presentation_size, notes,
-        status, telegram_status, created_at, updated_at
-      ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-        'new', 'not_configured', ?, ?
-      )
-    `)
-    .run(
-      id,
-      data.name,
-      data.company,
-      data.phone,
-      data.telegram || '',
-      data.email || '',
-      data.category,
-      data.productName,
-      data.description,
-      data.tariff,
-      data.productionCost || '',
-      data.retailPrice || '',
-      data.monthlyVolume || '',
-      data.targetNetworks || '',
-      data.networkLevel || '',
-      data.networkNames || '',
-      data.federalNetworks || '',
-      data.regionalNetworks || '',
-      data.localNetworks || '',
-      data.unknownNetworks || '',
-      data.presentationUrl || '',
-      data.presentationName || '',
-      data.presentationType || '',
-      data.presentationSize || 0,
-      data.notes || '',
-      now,
-      now
-    );
-  return getApplication(id)!;
+  try {
+    getDb()
+      .prepare(`
+        INSERT INTO applications (
+          id, name, company, phone, telegram, email, category, product_name, description,
+          tariff, production_cost, retail_price, monthly_volume, target_networks,
+          network_level, network_names, federal_networks, regional_networks, local_networks, unknown_networks,
+          presentation_url, presentation_name, presentation_type, presentation_size, notes,
+          status, telegram_status, created_at, updated_at
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          'new', 'not_configured', ?, ?
+        )
+      `)
+      .run(
+        id,
+        data.name,
+        data.company,
+        data.phone,
+        data.telegram || '',
+        data.email || '',
+        data.category,
+        data.productName,
+        data.description,
+        data.tariff,
+        data.productionCost || '',
+        data.retailPrice || '',
+        data.monthlyVolume || '',
+        data.targetNetworks || '',
+        data.networkLevel || '',
+        data.networkNames || '',
+        data.federalNetworks || '',
+        data.regionalNetworks || '',
+        data.localNetworks || '',
+        data.unknownNetworks || '',
+        data.presentationUrl || '',
+        data.presentationName || '',
+        data.presentationType || '',
+        data.presentationSize || 0,
+        data.notes || '',
+        now,
+        now
+      );
+    return getApplication(id)!;
+  } catch {
+    disableSqlite();
+    return createInJsonStore();
+  }
 }
 
 export function updateTelegramStatus(id: string, status: ApplicationRecord['telegramStatus']) {
@@ -352,8 +375,14 @@ export function getApplication(id: string) {
     return application ? normalizeApplicationRecord(application) : null;
   }
 
-  const row = getDb().prepare('SELECT * FROM applications WHERE id = ?').get(id) as Record<string, unknown> | undefined;
-  return row ? map(row) : null;
+  try {
+    const row = getDb().prepare('SELECT * FROM applications WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    return row ? map(row) : null;
+  } catch {
+    disableSqlite();
+    const application = readStore().applications.find((item) => item.id === id);
+    return application ? normalizeApplicationRecord(application) : null;
+  }
 }
 
 export function listApplications() {
@@ -364,8 +393,16 @@ export function listApplications() {
       .slice(0, 300);
   }
 
-  const rows = getDb().prepare('SELECT * FROM applications ORDER BY created_at DESC LIMIT 300').all() as Record<string, unknown>[];
-  return rows.map(map);
+  try {
+    const rows = getDb().prepare('SELECT * FROM applications ORDER BY created_at DESC LIMIT 300').all() as Record<string, unknown>[];
+    return rows.map(map);
+  } catch {
+    disableSqlite();
+    return readStore().applications
+      .map(normalizeApplicationRecord)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 300);
+  }
 }
 
 export function getAuditByApplicationId(applicationId: string) {
