@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import type { ApplicationInput } from './validation';
 import type { AuditBlockResult, AuditDraft } from './audit-methodology';
@@ -55,7 +56,7 @@ function dbPath() {
   }
   const baseDir = process.env.RETAIL_AUDIT_DATA_DIR
     || process.env.DATA_DIR
-    || (process.env.NODE_ENV === 'production' ? path.join('/tmp', 'retail_ready_audit') : path.join(process.cwd(), 'data'));
+    || (process.env.NODE_ENV === 'production' ? path.join(os.tmpdir(), 'retail_ready_audit') : path.join(process.cwd(), 'data'));
   return path.join(baseDir, 'retail_ready_audit.db');
 }
 
