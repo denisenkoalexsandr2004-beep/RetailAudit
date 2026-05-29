@@ -6,11 +6,17 @@ import { useEffect, useMemo, useState } from 'react';
 
 type Application = {
   id: string;
+  name?: string;
   company: string;
+  phone?: string;
+  telegram?: string;
+  email?: string;
   productName: string;
   category: string;
   description: string;
   tariff: 'audit' | 'audit_plus';
+  status?: 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
+  createdAt?: string;
   productionCost?: string;
   retailPrice?: string;
   monthlyVolume?: string;
@@ -98,10 +104,24 @@ export default function AuditStudioPage() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [activeBlockId, setActiveBlockId] = useState('');
+  const [funnelApplications, setFunnelApplications] = useState<Application[]>([]);
+  const [selectedFunnelId, setSelectedFunnelId] = useState(applicationId);
 
   const activeBlock = useMemo(
     () => audit?.blocks.find((block) => block.id === activeBlockId) || audit?.blocks[0] || null,
     [activeBlockId, audit]
+  );
+
+  const paidInWorkApplications = useMemo(
+    () => funnelApplications.filter((item) => item.status === 'paid_in_work'),
+    [funnelApplications]
+  );
+
+  const selectedFunnelApplication = useMemo(
+    () => paidInWorkApplications.find((item) => item.id === selectedFunnelId)
+      || paidInWorkApplications.find((item) => item.id === applicationId)
+      || application,
+    [application, applicationId, paidInWorkApplications, selectedFunnelId]
   );
 
   async function request(path: string, init: RequestInit = {}, currentToken = token) {
@@ -121,9 +141,13 @@ export default function AuditStudioPage() {
     setLoading(true);
     setError('');
     try {
-      const data = await request(`/api/admin/audits?applicationId=${encodeURIComponent(applicationId)}`, {}, currentToken);
+      const [data, listData] = await Promise.all([
+        request(`/api/admin/audits?applicationId=${encodeURIComponent(applicationId)}`, {}, currentToken),
+        request('/api/admin/applications', {}, currentToken)
+      ]);
       setApplication(data.application || null);
       setAudit(data.audit || null);
+      setFunnelApplications(listData.applications || []);
       setActiveBlockId(data.audit?.blocks?.[0]?.id || '');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Не удалось загрузить аудит.');
@@ -194,6 +218,7 @@ export default function AuditStudioPage() {
   useEffect(() => {
     const saved = window.localStorage.getItem('rra_admin_token') || '';
     setToken(saved);
+    setSelectedFunnelId(applicationId);
     if (saved) load(saved);
     else setLoading(false);
   }, [applicationId]);
@@ -246,6 +271,55 @@ export default function AuditStudioPage() {
       {token && !loading && application && (
         <section className="auditStudioWork adminExactContainer">
           <aside className="auditStudioSidebar">
+            <section className="auditStudioFunnelList">
+              <div className="auditStudioFunnelHead">
+                <span>Воронка</span>
+                <b>{paidInWorkApplications.length}</b>
+              </div>
+              <h3>Счёт оплачен, в работе</h3>
+              <p>Все анкеты, которые сейчас находятся на этом этапе.</p>
+              <div className="auditStudioFunnelItems">
+                {paidInWorkApplications.length ? paidInWorkApplications.map((item, index) => (
+                  <button
+                    type="button"
+                    key={item.id}
+                    className={item.id === selectedFunnelId ? 'active' : ''}
+                    onClick={() => setSelectedFunnelId(item.id)}
+                  >
+                    <em>{index + 1}</em>
+                    <span>
+                      <strong>{item.productName}</strong>
+                      <small>{item.company}</small>
+                    </span>
+                  </button>
+                )) : (
+                  <div className="auditStudioFunnelEmpty">На этом этапе пока нет заявок.</div>
+                )}
+              </div>
+            </section>
+
+            {selectedFunnelApplication && (
+              <section className="auditStudioSupplierCard">
+                <div className="auditStudioSupplierTop">
+                  <span>Поставщик</span>
+                  <b>{selectedFunnelApplication.id}</b>
+                </div>
+                <h3>{selectedFunnelApplication.company}</h3>
+                <p>{selectedFunnelApplication.productName}</p>
+                <dl>
+                  <div><dt>Контакт</dt><dd>{selectedFunnelApplication.name || '-'}</dd></div>
+                  <div><dt>Телефон</dt><dd>{selectedFunnelApplication.phone || '-'}</dd></div>
+                  <div><dt>Telegram</dt><dd>{selectedFunnelApplication.telegram || '-'}</dd></div>
+                  <div><dt>Email</dt><dd>{selectedFunnelApplication.email || '-'}</dd></div>
+                  <div><dt>Категория</dt><dd>{selectedFunnelApplication.category || '-'}</dd></div>
+                  <div><dt>Сети</dt><dd>{selectedFunnelApplication.networkNames || selectedFunnelApplication.targetNetworks || '-'}</dd></div>
+                </dl>
+                <Link className="auditStudioSupplierLink" href={`/admin/applications/${selectedFunnelApplication.id}/audit`}>
+                  Открыть аудит заявки
+                </Link>
+              </section>
+            )}
+
             <section>
               <h2>{application.productName}</h2>
               <p>{application.company}</p>
@@ -286,6 +360,7 @@ export default function AuditStudioPage() {
                     <h2>{audit.readinessLevel}</h2>
                   </div>
                   <div className="auditStudioActions">
+                    <Link className="auditStudioBackButton" href="/admin/applications">← К заявкам</Link>
                     <select value={audit.status} onChange={(event) => updateAudit({ ...audit, status: event.target.value as Audit['status'] })}>
                       {Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                     </select>

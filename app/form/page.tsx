@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { getTariffLabel, type TariffCode } from '@/lib/tariffs';
+import type { TariffCode } from '@/lib/tariffs';
 
 type FormState = {
   name: string;
@@ -27,6 +27,7 @@ type CountryOption = {
   dial: string;
   flagUrl: string;
   label: string;
+  example: string;
 };
 
 const initialState: FormState = {
@@ -50,28 +51,28 @@ const initialState: FormState = {
 const categories = ['Молочная продукция', 'Напитки', 'Снеки и закуски', 'Кондитерские изделия', 'Мясная продукция', 'Замороженные продукты', 'Бакалея', 'Другое'];
 
 const phoneCountries: CountryOption[] = [
-  { code: 'RU', dial: '+7', flagUrl: 'https://flagcdn.com/w40/ru.png', label: 'Россия' },
-  { code: 'BY', dial: '+375', flagUrl: 'https://flagcdn.com/w40/by.png', label: 'Беларусь' },
-  { code: 'KZ', dial: '+7', flagUrl: 'https://flagcdn.com/w40/kz.png', label: 'Казахстан' },
-  { code: 'UZ', dial: '+998', flagUrl: 'https://flagcdn.com/w40/uz.png', label: 'Узбекистан' },
-  { code: 'KG', dial: '+996', flagUrl: 'https://flagcdn.com/w40/kg.png', label: 'Кыргызстан' },
-  { code: 'AM', dial: '+374', flagUrl: 'https://flagcdn.com/w40/am.png', label: 'Армения' },
-  { code: 'AZ', dial: '+994', flagUrl: 'https://flagcdn.com/w40/az.png', label: 'Азербайджан' },
-  { code: 'GE', dial: '+995', flagUrl: 'https://flagcdn.com/w40/ge.png', label: 'Грузия' },
-  { code: 'TJ', dial: '+992', flagUrl: 'https://flagcdn.com/w40/tj.png', label: 'Таджикистан' },
-  { code: 'MD', dial: '+373', flagUrl: 'https://flagcdn.com/w40/md.png', label: 'Молдова' }
+  { code: 'RU', dial: '+7', flagUrl: 'https://flagcdn.com/48x36/ru.png', label: 'Россия', example: '916 000-00-00' },
+  { code: 'BY', dial: '+375', flagUrl: 'https://flagcdn.com/48x36/by.png', label: 'Беларусь', example: '29 000-00-00' },
+  { code: 'KZ', dial: '+7', flagUrl: 'https://flagcdn.com/48x36/kz.png', label: 'Казахстан', example: '701 000-00-00' },
+  { code: 'UZ', dial: '+998', flagUrl: 'https://flagcdn.com/48x36/uz.png', label: 'Узбекистан', example: '90 000-00-00' },
+  { code: 'KG', dial: '+996', flagUrl: 'https://flagcdn.com/48x36/kg.png', label: 'Кыргызстан', example: '555 000-000' },
+  { code: 'AM', dial: '+374', flagUrl: 'https://flagcdn.com/48x36/am.png', label: 'Армения', example: '91 000-000' },
+  { code: 'AZ', dial: '+994', flagUrl: 'https://flagcdn.com/48x36/az.png', label: 'Азербайджан', example: '50 000-00-00' },
+  { code: 'GE', dial: '+995', flagUrl: 'https://flagcdn.com/48x36/ge.png', label: 'Грузия', example: '555 00-00-00' },
+  { code: 'TJ', dial: '+992', flagUrl: 'https://flagcdn.com/48x36/tj.png', label: 'Таджикистан', example: '92 000-00-00' },
+  { code: 'MD', dial: '+373', flagUrl: 'https://flagcdn.com/48x36/md.png', label: 'Молдова', example: '69 000-000' }
 ];
 
 function applyDialCode(currentPhone: string, nextDial: string, previousDial?: string) {
   const trimmed = currentPhone.trim();
-  if (!trimmed) return `${nextDial} `;
+  if (!trimmed) return '';
   if (previousDial && trimmed.startsWith(previousDial)) {
-    return `${nextDial}${trimmed.slice(previousDial.length)}`.trimStart() + (trimmed === previousDial ? ' ' : '');
+    return trimmed.slice(previousDial.length).trimStart();
   }
-  if (!trimmed.startsWith('+')) {
-    return `${nextDial} ${trimmed}`.trim();
+  if (trimmed.startsWith(nextDial)) {
+    return trimmed.slice(nextDial.length).trimStart();
   }
-  return trimmed;
+  return trimmed.replace(/^\+\d+\s*/, '');
 }
 
 export default function FormPage() {
@@ -86,6 +87,7 @@ export default function FormPage() {
 
   const steps = useMemo(() => ['01 О вас', '02 Продукт', '03 Экономика'], []);
   const update = (key: keyof FormState, value: string) => setForm(prev => ({ ...prev, [key]: value }));
+  const updatePhone = (value: string) => update('phone', applyDialCode(value, phoneCountry.dial, phoneCountry.dial));
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
@@ -123,10 +125,14 @@ export default function FormPage() {
     setStatus('');
     setLoading(true);
     try {
+      const payload = {
+        ...form,
+        phone: `${phoneCountry.dial} ${form.phone}`.trim()
+      };
       const response = await fetch('/api/applications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || 'Заявка не отправлена.');
@@ -204,12 +210,12 @@ export default function FormPage() {
                   <input
                     required
                     value={form.phone}
-                    onChange={e => update('phone', e.target.value)}
-                    placeholder={`${phoneCountry.dial} 916 000-00-00`}
+                    onChange={e => updatePhone(e.target.value)}
+                    placeholder={phoneCountry.example}
                     type="tel"
                   />
                 </div>
-                <span className="countryHint">Выберите страну, код подставится автоматически. Номер можно поправить вручную.</span>
+                <span className="countryHint">Выберите страну слева. В поле вводите номер без кода страны.</span>
               </label>
               <label>Telegram<input value={form.telegram} onChange={e => update('telegram', e.target.value)} placeholder="@username" /></label>
               <label>Email<input value={form.email} onChange={e => update('email', e.target.value)} placeholder="client@company.ru" /></label>
@@ -231,12 +237,6 @@ export default function FormPage() {
         {step === 2 && (
           <div className="formStep">
             <h2>Экономика</h2>
-            <div className="tariffSwitch">
-              <button type="button" className={form.tariff === 'to_clarify' ? 'selected' : ''} onClick={() => update('tariff', 'to_clarify')}>Уточнить тариф</button>
-              <button type="button" className={form.tariff === 'audit' ? 'selected' : ''} onClick={() => update('tariff', 'audit')}>Аудит · 50 000 ₽</button>
-              <button type="button" className={form.tariff === 'audit_plus' ? 'selected' : ''} onClick={() => update('tariff', 'audit_plus')}>Аудит + Переговоры · 150 000 ₽</button>
-            </div>
-            <div className="tariffHint">В CRM сохранится: <b>{getTariffLabel(form.tariff, form.tariff !== 'to_clarify')}</b></div>
             <div className="fieldGrid">
               <label>Себестоимость, ₽<input type="number" min="0" value={form.productionCost} onChange={e => update('productionCost', e.target.value)} /></label>
               <label>РРЦ, ₽<input type="number" min="0" value={form.retailPrice} onChange={e => update('retailPrice', e.target.value)} /></label>

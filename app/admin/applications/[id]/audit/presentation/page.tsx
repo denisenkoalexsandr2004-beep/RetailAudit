@@ -48,14 +48,47 @@ type Audit = {
   roadmap: string[];
 };
 
+const footerText = 'Данные и оценки носят экспертный характер и являются условными.';
+
 function scoreClass(score: number) {
-  if (score > 70) return 'good';
-  if (score > 60) return 'mid';
+  if (score >= 75) return 'good';
+  if (score >= 60) return 'mid';
   return 'bad';
 }
 
 function today() {
   return new Date().toLocaleDateString('ru-RU');
+}
+
+function networksFor(application: Application) {
+  return application.networkNames || application.targetNetworks || 'целевые розничные сети';
+}
+
+function splitNetworks(value: string) {
+  return value
+    .split(/[,;\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 7);
+}
+
+function blockIcon(blockId: string) {
+  if (blockId === 'product') return 'product';
+  if (blockId === 'company') return 'company';
+  if (blockId === 'negotiation') return 'negotiation';
+  return 'network';
+}
+
+function kpiIcon(title: string) {
+  if (/рынок|аналог|масштаб|объем|объём/i.test(title)) return 'market';
+  if (/цена|марж/i.test(title)) return 'price';
+  if (/упаков/i.test(title)) return 'pack';
+  if (/логист|постав/i.test(title)) return 'truck';
+  if (/сайт|публич/i.test(title)) return 'globe';
+  if (/команд|переговор/i.test(title)) return 'people';
+  if (/надеж|стабил|сертифик/i.test(title)) return 'shield';
+  if (/презентац|материал|кп/i.test(title)) return 'screen';
+  return 'list';
 }
 
 function PresentationIcon({ kind }: { kind: string }) {
@@ -74,32 +107,13 @@ function PresentationIcon({ kind }: { kind: string }) {
     star: <path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.1-5.6-3-5.6 3 1.1-6.1L3 9.6l6.2-.9L12 3z" />,
     screen: <><path d="M4 5h16v11H4z" /><path d="M9 20h6M12 16v4" /></>,
     globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>,
-    megaphone: <><path d="M4 14h4l10 4V6L8 10H4v4z" /><path d="M8 14l2 6" /></>
+    bulb: <><path d="M9 18h6" /><path d="M10 22h4" /><path d="M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 4H9c0-2 0-3-1-4z" /></>,
+    target: <><circle cx="12" cy="12" r="8" /><circle cx="12" cy="12" r="4" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></>,
+    calendar: <><path d="M4 5h16v15H4z" /><path d="M8 3v4M16 3v4M4 9h16" /></>,
+    database: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" /><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" /></>
   };
 
   return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[kind] || paths.list}</svg>;
-}
-
-function blockIcon(blockId: string) {
-  if (blockId === 'product') return 'product';
-  if (blockId === 'company') return 'company';
-  if (blockId === 'negotiation') return 'negotiation';
-  return 'network';
-}
-
-function kpiIcon(title: string) {
-  if (/рынок|аналог/i.test(title)) return 'market';
-  if (/цена/i.test(title)) return 'price';
-  if (/характер/i.test(title)) return 'list';
-  if (/упаков/i.test(title)) return 'pack';
-  if (/аудитор|команд|переговорщик|сегмент/i.test(title)) return 'people';
-  if (/логист|цепочка/i.test(title)) return 'truck';
-  if (/надеж|стабил/i.test(title)) return 'shield';
-  if (/репутац|уник/i.test(title)) return 'star';
-  if (/презентац/i.test(title)) return 'screen';
-  if (/сайт/i.test(title)) return 'globe';
-  if (/публич/i.test(title)) return 'megaphone';
-  return 'network';
 }
 
 function SlideHeader({ page }: { page: number }) {
@@ -117,38 +131,28 @@ function SlideFooter() {
     <footer>
       <span>Дата аудита: {today()}</span>
       <span>Срок подготовки отчёта: 48 часов</span>
-      <span>Данные и оценки носят экспертный характер и являются условными.</span>
+      <span>{footerText}</span>
     </footer>
   );
+}
+
+function readinessText(score: number) {
+  if (score >= 75) return 'высокий';
+  if (score >= 60) return 'средний';
+  if (score >= 40) return 'низкий';
+  return 'критичный';
 }
 
 export default function AuditPresentationPage() {
   const params = useParams<{ id: string }>();
   const applicationId = params.id;
-  const [token, setToken] = useState('');
   const [application, setApplication] = useState<Application | null>(null);
   const [audit, setAudit] = useState<Audit | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const blocks = audit?.blocks || [];
-  const productBlock = blocks.find((block) => block.id === 'product') || blocks[0];
-  const companyBlock = blocks.find((block) => block.id === 'company') || blocks[1];
-  const negotiationBlock = blocks.find((block) => block.id === 'negotiation') || blocks[2];
-  const networkBlock = blocks.find((block) => block.id === 'network_relevance' || block.id === 'network') || blocks[3];
-  const networks = application?.networkNames || application?.targetNetworks || 'целевые сети требуют уточнения';
-
-  const strongest = useMemo(() => {
-    return [...blocks].sort((a, b) => b.score - a.score)[0];
-  }, [blocks]);
-
-  const weakest = useMemo(() => {
-    return [...blocks].sort((a, b) => a.score - b.score)[0];
-  }, [blocks]);
-
   useEffect(() => {
     const saved = window.localStorage.getItem('rra_admin_token') || '';
-    setToken(saved);
     if (!saved) {
       setLoading(false);
       setError('Нужен вход в админку.');
@@ -169,6 +173,22 @@ export default function AuditPresentationPage() {
       .finally(() => setLoading(false));
   }, [applicationId]);
 
+  useEffect(() => {
+    if (loading || error) return;
+    const target = window.location.hash ? document.querySelector(window.location.hash) : null;
+    target?.scrollIntoView({ block: 'start' });
+  }, [loading, error]);
+
+  const blocks = audit?.blocks || [];
+  const strongest = useMemo(() => [...blocks].sort((a, b) => b.score - a.score)[0], [blocks]);
+  const weakest = useMemo(() => [...blocks].sort((a, b) => a.score - b.score)[0], [blocks]);
+  const riskKpis = useMemo(() => {
+    return blocks
+      .flatMap((block) => block.kpis.map((kpi) => ({ ...kpi, blockTitle: block.title })))
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 4);
+  }, [blocks]);
+
   if (loading) {
     return <main className="auditPresentationState">Готовлю клиентскую презентацию...</main>;
   }
@@ -183,14 +203,17 @@ export default function AuditPresentationPage() {
     );
   }
 
+  const networks = networksFor(application);
+  const networkRows = splitNetworks(networks);
+
   return (
-    <main className="auditPresentation">
+    <main className="auditPresentation reportPresentation">
       <div className="auditPresentationControls">
         <Link href={`/admin/applications/${applicationId}/audit`}>Назад в Audit Studio</Link>
         <button type="button" onClick={() => window.print()}>Сохранить PDF</button>
       </div>
 
-      <section className="clientSlide dashboardSlide">
+      <section className="clientSlide dashboardSlide" id="slide-1">
         <SlideHeader page={1} />
         <div className="dashboardGrid">
           <div>
@@ -209,33 +232,36 @@ export default function AuditPresentationPage() {
           </div>
           <aside>
             <h2>Из чего формируется общий балл</h2>
-            {blocks.map((block) => (
+            {blocks.slice(0, 4).map((block, index) => (
               <article className={scoreClass(block.score)} key={block.id}>
                 <div className="slideIcon"><PresentationIcon kind={blockIcon(block.id)} /></div>
                 <div>
-                  <h3>{block.title}</h3>
+                  <h3>{index + 1}. {block.title}</h3>
                   <p>{block.goal}</p>
                   <i><span style={{ width: `${block.score}%` }} /></i>
                 </div>
                 <b>{block.score}%</b>
               </article>
             ))}
+            <div className="detailHint">Детальный разбор по 4 блокам на следующих слайдах</div>
           </aside>
         </div>
         <SlideFooter />
       </section>
 
-      {[productBlock, companyBlock, negotiationBlock, networkBlock].filter(Boolean).map((block, index) => (
-        <section className="clientSlide blockSlide" key={block.id}>
+      {blocks.slice(0, 3).map((block, index) => (
+        <section className="clientSlide blockSlide" id={`slide-${index + 2}`} key={block.id}>
           <SlideHeader page={index + 2} />
           <div className="blockSlideGrid">
             <div>
-              <span className="slideEyebrow">Блок {index + 1}</span>
-              <h1>{block.title}</h1>
+              <h1>{index + 1}. {block.title}</h1>
               <p>{block.goal}</p>
-              <div className={`blockScore ${scoreClass(block.score)}`}>
-                <b>{block.score}%</b>
-                <span>{block.score > 70 ? 'Сильный блок' : block.score > 60 ? 'Рабочая основа' : 'Требует доработки'}</span>
+              <div className="scorePanel">
+                <div className={`blockScore ${scoreClass(block.score)}`}>
+                  <b>{block.score}%</b>
+                  <span>готовность</span>
+                </div>
+                <p>Оценка показывает, насколько текущая подготовка закрывает требования сетей по этому блоку.</p>
               </div>
               <div className="keyConclusion compact">
                 <strong>Ключевой вывод</strong>
@@ -244,8 +270,8 @@ export default function AuditPresentationPage() {
             </div>
             <div>
               <h2 className="kpiTableTitle">Из чего складывается оценка</h2>
-              <div className="kpiTable">
-                {block.kpis.map((kpi) => (
+              <div className="kpiTable reportKpiTable">
+                {block.kpis.slice(0, 6).map((kpi) => (
                   <article className={scoreClass(kpi.score)} key={kpi.id}>
                     <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
                     <div>
@@ -262,74 +288,140 @@ export default function AuditPresentationPage() {
         </section>
       ))}
 
-      <section className="clientSlide insightSlide">
-        <SlideHeader page={6} />
-        <h1 className="recommendationsTitle">Что необходимо улучшить до переговоров</h1>
-        <p>Пункты, которые сильнее всего влияют на решение закупщика. Сфокусируйтесь на них в первую очередь.</p>
-        <div className="keyConclusion compact">
-          <strong>Ключевой вывод</strong>
-          <p>{audit.verdict}</p>
+      <section className="clientSlide networkReportSlide" id="slide-5">
+        <SlideHeader page={5} />
+        <h1>5. Релевантность к актуальным запросам сетей</h1>
+        <p>Потенциально релевантные сети и форматы входа для продукта {application.productName}</p>
+        <div className="networkSlideGrid">
+          <div>
+            <h2>Какие форматы подходят больше всего</h2>
+            <div className="auditTable">
+              <div className="auditTableHead"><span>№</span><span>Формат</span><span>Комментарий</span><span>Релевантность</span></div>
+              {['Канал удобства / food-to-go', 'Специализированный / ЗОЖ', 'Гипер / супер', 'Супермаркет', 'Магазины у дома'].map((format, index) => (
+                <div className="auditTableRow" key={format}>
+                  <b>{index + 1}</b>
+                  <span>{format}</span>
+                  <p>{application.category}: формат может быть релевантен при подтверждении цены, объёмов и стабильности поставок.</p>
+                  <em className={index < 2 ? 'good' : 'mid'}>{index < 2 ? 'высокая' : 'средняя'}</em>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h2>Рекомендуемые сети с комфортным входом</h2>
+            <div className="auditTable">
+              <div className="auditTableHead"><span>№</span><span>Сеть / формат</span><span>Комментарий</span><span>Порог входа</span></div>
+              {(networkRows.length ? networkRows : ['ВкусВилл', 'Пятёрочка', 'Лента', 'Перекрёсток', 'Магнит']).map((network, index) => (
+                <div className="auditTableRow" key={`${network}-${index}`}>
+                  <b>{index + 1}</b>
+                  <span>{network}</span>
+                  <p>Нужны подтверждённые УТП, экономика, условия поставки и готовность к первому контакту.</p>
+                  <em className={index < 2 ? 'good' : index < 4 ? 'mid' : 'bad'}>{index < 2 ? 'низкий' : index < 4 ? 'средний' : 'высокий'}</em>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="insightGrid">
-          <article>
-            <span>Сильная сторона</span>
-            <h2>{strongest?.title || 'Не определено'}</h2>
-            <p>{strongest?.conclusion || audit.summary}</p>
-          </article>
-          <article>
-            <span>Зона риска</span>
-            <h2>{weakest?.title || 'Не определено'}</h2>
-            <p>{weakest?.conclusion || 'Требуется экспертная проверка.'}</p>
-          </article>
-          <article>
-            <span>Релевантные сети</span>
-            <h2>{networks}</h2>
-            <p>Перед переговорами нужно подтвердить формат входа, объём пилота, условия поставки и категорийную релевантность.</p>
-          </article>
+        <div className="keyConclusion networkConclusion">
+          <strong>Ключевой вывод</strong>
+          <p>{blocks[3]?.conclusion || `Наибольший потенциал входа есть в сетях: ${networks}. Для успешного входа критичны экономика, объёмы и доказанная релевантность категории.`}</p>
         </div>
         <SlideFooter />
       </section>
 
-      <section className="clientSlide recommendationsSlide">
-        <SlideHeader page={7} />
-        <h1>Дорожная карта по входу в сети</h1>
-        <p>Пошаговый план действий на основе проведенного аудита</p>
-        <div className="keyConclusion compact">
-          <strong>Ключевой вывод</strong>
-          <p>Ваша готовность к переговорам может быть повышена при последовательной реализации шагов из этой дорожной карты.</p>
+      <section className="clientSlide improvementSlide" id="slide-6">
+        <SlideHeader page={6} />
+        <div className="improvementHead">
+          <div>
+            <h1>6. Что необходимо улучшить до переговоров</h1>
+            <p>Пункты, которые сильнее всего влияют на решение закупщика. Сфокусируйтесь на них в первую очередь.</p>
+          </div>
+          <div className="keyConclusion compact">
+            <strong>Ключевой вывод</strong>
+            <p>{audit.verdict}</p>
+          </div>
         </div>
-        <div className="recommendationList">
-          {audit.roadmap.map((item, index) => (
-            <article key={`${item}-${index}`}>
+        <div className="improvementTable">
+          <div className="improvementTableHead"><span>№</span><span>Что улучшить</span><span>Почему это важно</span><span>Приоритет</span></div>
+          {(riskKpis.length ? riskKpis : []).map((kpi, index) => (
+            <article className={scoreClass(kpi.score)} key={`${kpi.blockTitle}-${kpi.id}`}>
               <b>{index + 1}</b>
-              <p>{item}</p>
+              <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
+              <h3>{kpi.title}</h3>
+              <p>{kpi.comment}</p>
+              <em>{readinessText(kpi.score)}</em>
             </article>
           ))}
         </div>
         <SlideFooter />
       </section>
 
-      <section className="clientSlide roadmapSlide">
+      <section className="clientSlide roadmapReportSlide" id="slide-7">
+        <SlideHeader page={7} />
+        <div className="improvementHead">
+          <div>
+            <h1>7. Дорожная карта по входу в сети</h1>
+            <p>Пошаговый план действий на основе проведенного аудита</p>
+          </div>
+          <div className="keyConclusion compact">
+            <strong>Ключевой вывод</strong>
+            <p>Готовность к переговорам может быть повышена при последовательной реализации шагов из этой дорожной карты.</p>
+          </div>
+        </div>
+        <div className="timelineRoadmap">
+          {(audit.roadmap.length ? audit.roadmap : audit.recommendations).slice(0, 5).map((item, index) => (
+            <article key={`${item}-${index}`}>
+              <b>{index + 1}</b>
+              <div className="slideIcon"><PresentationIcon kind={index === 5 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : 'target'} /></div>
+              <h3>{item}</h3>
+              <p>{index === 5 ? 'Получаете доступ к сетям, переговорам и реальным возможностям для входа.' : 'Усиливает аргументацию, закрывает слабые места и повышает шанс успешного контакта.'}</p>
+            </article>
+          ))}
+        </div>
+        <div className="importantNote"><b>Важно</b><span>Консультация с экспертом ЦЗС доступна в течение 14 дней со дня отправки отчёта.</span></div>
+        <SlideFooter />
+      </section>
+
+      <section className="clientSlide sourceReportSlide" id="slide-8">
         <SlideHeader page={8} />
-        <h1>Источники, инструменты и экспертная проверка</h1>
+        <h1>8. Источники, инструменты и экспертная проверка</h1>
         <p>Прозрачность данных и экспертиза, на которых основаны выводы аудита</p>
-        <div className="insightGrid">
+        <div className="sourceReportGrid">
           <article>
-            <span>Используемые данные</span>
-            <p>Материалы поставщика и анкета<br />Сайт, КП, презентация, прайс<br />Открытые данные о рынке и аналогах<br />Список сетей ближайшего ЦЗС</p>
+            <h2>Используемые данные</h2>
+            <p>Материалы поставщика и анкета</p>
+            <p>Сайт, КП, презентация, прайс</p>
+            <p>Открытые данные о рынке и аналогах</p>
+            <p>Список сетей ближайшего ЦЗС</p>
+            <p>Обезличенная обратная связь закупщиков</p>
           </article>
           <article>
-            <span>Инструменты</span>
-            <p>AI-assisted research<br />Экспертная проверка команды ЦЗС™<br />DaData / Контур.Фокус / ЕГРЮЛ<br />Каталоги сетей и маркетплейсы</p>
+            <h2>Инструменты</h2>
+            <p>AI-assisted research</p>
+            <p>Экспертная проверка команды ЦЗС™</p>
+            <p>DaData / КонтурФокус / ЕГРЮЛ</p>
+            <p>Каталоги сетей и маркетплейсы</p>
+            <p>Отраслевые СМИ и аналитика</p>
           </article>
           <article>
-            <span>Проверка охватывает</span>
-            <p>Продукт и рынок<br />Компания и надежность<br />Переговорная кампания<br />Релевантность сетям<br />Цифровые следы и репутация</p>
+            <h2>Проверка охватывает</h2>
+            <div className="coverage360">360°<span>проверка поставщика</span></div>
+            <p>Продукт и рынок</p>
+            <p>Компания и надежность</p>
+            <p>Переговорная кампания</p>
+            <p>Релевантность сетям</p>
           </article>
         </div>
-        <div className="nextStep">
-          <strong>Ключевой вывод</strong>
-          <p>Аудит проведён при участии специалиста ЦЗС™ по переговорам с розничными сетями и отраслевого эксперта по FMCG-категории.</p>
+        <div className="expertSignature">
+          <div className="slideIcon"><PresentationIcon kind="people" /></div>
+          <div>
+            <h2>Экспертная подпись</h2>
+            <p>Аудит проведён при участии специалиста ЦЗС™ по переговорам с розничными сетями и отраслевого эксперта по категории {application.category}.</p>
+          </div>
+          <div><b>500+</b><span>поставщиков прошли аудит</span></div>
+          <div><b>35+</b><span>категорий FMCG</span></div>
+          <div><b>1000+</b><span>переговоров подготовлено</span></div>
+          <div><b>85%</b><span>клиентов рекомендуют аудит</span></div>
         </div>
         <SlideFooter />
       </section>

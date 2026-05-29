@@ -218,10 +218,7 @@ export default function AdminApplicationsPage() {
           <span className="adminExactTitle">Retail Ready <b>Аудит</b></span>
         </a>
         <div className="adminExactLinks">
-          <a href="/">Главная</a>
-          <a href="/form">Форма</a>
           {token && <a href={selected ? `/admin/applications/${selected.id}/audit` : '/admin/applications'}>Audit Studio</a>}
-          <a href="/audit-studio-demo.html">Демо Audit Studio</a>
           {token && <button className="adminExactLogout" type="button" onClick={logoutAdmin}>Выйти</button>}
           <a className="adminExactNavBtn" href="/">Открыть сайт</a>
         </div>
@@ -326,6 +323,7 @@ export default function AdminApplicationsPage() {
                     onClick={() => updateStatus(selected.id, stage.value)}
                     disabled={updatingId === selected.id}
                   >
+                    <small>Этап {index + 1}</small>
                     <span>{stage.label}</span>
                   </button>
                 ))}
