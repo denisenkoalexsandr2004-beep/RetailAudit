@@ -16,9 +16,9 @@ async function postTelegramMessage(text: string) {
     return 'not_configured' as const;
   }
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     try {
       const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -46,7 +46,10 @@ async function postTelegramMessage(text: string) {
 
       if (response.status >= 400 && response.status < 500) return 'failed' as const;
     } catch (error) {
-      console.error('Telegram notification request failed', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Telegram notification request failed', {
+        attempt: attempt + 1,
+        reason: error instanceof Error ? error.message : 'Unknown error'
+      });
     } finally {
       clearTimeout(timeout);
     }
