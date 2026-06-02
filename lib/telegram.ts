@@ -8,7 +8,13 @@ function escapeHtml(value: string) {
 async function postTelegramMessage(text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return 'not_configured' as const;
+  if (!token || !chatId) {
+    console.error('Telegram is not configured', {
+      hasToken: Boolean(token),
+      hasChatId: Boolean(chatId)
+    });
+    return 'not_configured' as const;
+  }
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const controller = new AbortController();
@@ -27,10 +33,20 @@ async function postTelegramMessage(text: string) {
         })
       });
 
-      if (response.ok) return 'sent' as const;
+      if (response.ok) {
+        console.info('Telegram notification sent');
+        return 'sent' as const;
+      }
+
+      const errorText = await response.text().catch(() => '');
+      console.error('Telegram notification failed', {
+        status: response.status,
+        body: errorText.slice(0, 500)
+      });
+
       if (response.status >= 400 && response.status < 500) return 'failed' as const;
-    } catch {
-      // Do not leak Telegram errors or payload data to users.
+    } catch (error) {
+      console.error('Telegram notification request failed', error instanceof Error ? error.message : 'Unknown error');
     } finally {
       clearTimeout(timeout);
     }
