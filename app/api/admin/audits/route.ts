@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
       application,
       audit: await getAuditByApplicationId(applicationId)
     });
-  } catch {
+  } catch (err) {
+    console.error('[audits GET]', err);
     return NextResponse.json({ message: 'Ошибка сервера при загрузке данных аудита.' }, { status: 500 });
   }
 }
@@ -60,7 +61,8 @@ export async function POST(request: NextRequest) {
     }
     const audit = await upsertAudit(application.id, generateAuditDraft(application), 'draft');
     return NextResponse.json({ application, audit });
-  } catch {
+  } catch (err) {
+    console.error('[audits POST]', err);
     return NextResponse.json({ message: 'Ошибка сервера при создании аудита.' }, { status: 500 });
   }
 }
@@ -97,7 +99,8 @@ export async function PATCH(request: NextRequest) {
     });
     if (!audit) return NextResponse.json({ message: 'Аудит не найден.' }, { status: 404 });
     return NextResponse.json({ audit });
-  } catch {
+  } catch (err) {
+    console.error('[audits PATCH]', err);
     return NextResponse.json({ message: 'Ошибка сервера при сохранении аудита.' }, { status: 500 });
   }
 }

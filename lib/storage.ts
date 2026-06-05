@@ -342,55 +342,68 @@ export async function getApplication(id: string) {
 export async function getAuditByApplicationId(applicationId: string) {
   if (!hasSupabaseConfig()) return getSqliteAuditByApplicationId(applicationId);
 
-  const rows = await supabaseRequest<SupabaseAuditRow[]>(
-    `audits?application_id=eq.${encodeURIComponent(applicationId)}&select=*&order=updated_at.desc&limit=1`
-  );
-  return rows[0] ? fromAuditRow(rows[0]) : null;
+  try {
+    const rows = await supabaseRequest<SupabaseAuditRow[]>(
+      `audits?application_id=eq.${encodeURIComponent(applicationId)}&select=*&order=updated_at.desc&limit=1`
+    );
+    return rows[0] ? fromAuditRow(rows[0]) : null;
+  } catch (err) {
+    console.error('[storage] getAuditByApplicationId Supabase failed, falling back to SQLite:', err);
+    return getSqliteAuditByApplicationId(applicationId);
+  }
 }
 
 export async function upsertAudit(applicationId: string, draft: AuditDraft, status: AuditRecord['status'] = 'draft') {
   if (!hasSupabaseConfig()) return upsertSqliteAudit(applicationId, draft, status);
 
-  const existing = await getAuditByApplicationId(applicationId);
-  if (existing) {
-    const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(existing.id)}&select=*`, {
-      method: 'PATCH',
+  try {
+    const existing = await getAuditByApplicationId(applicationId);
+    if (existing) {
+      const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(existing.id)}&select=*`, {
+        method: 'PATCH',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify(auditToRow(applicationId, draft, status))
+      });
+      return rows[0] ? fromAuditRow(rows[0]) : null;
+    }
+    const rows = await supabaseRequest<SupabaseAuditRow[]>('audits?select=*', {
+      method: 'POST',
       headers: { Prefer: 'return=representation' },
-      body: JSON.stringify(auditToRow(applicationId, draft, status))
+      body: JSON.stringify({
+        id: `AUD-${Date.now().toString(36).toUpperCase()}`,
+        ...auditToRow(applicationId, draft, status),
+        created_at: new Date().toISOString()
+      })
     });
     return rows[0] ? fromAuditRow(rows[0]) : null;
+  } catch (err) {
+    console.error('[storage] upsertAudit Supabase failed, falling back to SQLite:', err);
+    return upsertSqliteAudit(applicationId, draft, status);
   }
-
-  const rows = await supabaseRequest<SupabaseAuditRow[]>('audits?select=*', {
-    method: 'POST',
-    headers: { Prefer: 'return=representation' },
-    body: JSON.stringify({
-      id: `AUD-${Date.now().toString(36).toUpperCase()}`,
-      ...auditToRow(applicationId, draft, status),
-      created_at: new Date().toISOString()
-    })
-  });
-  return rows[0] ? fromAuditRow(rows[0]) : null;
 }
 
 export async function updateAudit(audit: Pick<AuditRecord, 'id' | 'status' | 'overallScore' | 'readinessLevel' | 'verdict' | 'summary' | 'blocks' | 'recommendations' | 'roadmap'>) {
   if (!hasSupabaseConfig()) return updateSqliteAudit(audit);
 
-  const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(audit.id)}&select=*`, {
-    method: 'PATCH',
-    headers: { Prefer: 'return=representation' },
-    body: JSON.stringify({
-      status: audit.status,
-      overall_score: audit.overallScore,
-      readiness_level: audit.readinessLevel,
-      verdict: audit.verdict,
-      summary: audit.summary,
-      blocks_json: audit.blocks,
-      recommendations_json: audit.recommendations,
-      roadmap_json: audit.roadmap,
-      updated_at: new Date().toISOString()
-    })
-  });
-
-  return rows[0] ? fromAuditRow(rows[0]) : null;
+  try {
+    const rows = await supabaseRequest<SupabaseAuditRow[]>(`audits?id=eq.${encodeURIComponent(audit.id)}&select=*`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({
+        status: audit.status,
+        overall_score: audit.overallScore,
+        readiness_level: audit.readinessLevel,
+        verdict: audit.verdict,
+        summary: audit.summary,
+        blocks_json: audit.blocks,
+        recommendations_json: audit.recommendations,
+        roadmap_json: audit.roadmap,
+        updated_at: new Date().toISOString()
+      })
+    });
+    return rows[0] ? fromAuditRow(rows[0]) : null;
+  } catch (err) {
+    console.error('[storage] updateAudit Supabase failed, falling back to SQLite:', err);
+    return updateSqliteAudit(audit);
+  }
 }
