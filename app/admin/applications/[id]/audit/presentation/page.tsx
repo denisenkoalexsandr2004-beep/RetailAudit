@@ -372,7 +372,7 @@ export default function AuditPresentationPage() {
           {(audit.roadmap.length ? audit.roadmap : audit.recommendations).slice(0, 5).map((item, index) => (
             <article key={`${item}-${index}`}>
               <b>{index + 1}</b>
-              <div className="slideIcon"><PresentationIcon kind={index === 5 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : 'target'} /></div>
+              <div className="slideIcon"><PresentationIcon kind={index === 4 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : 'target'} /></div>
               <h3>{item}</h3>
               <p>{index === 5 ? 'Получаете доступ к сетям, переговорам и реальным возможностям для входа.' : 'Усиливает аргументацию, закрывает слабые места и повышает шанс успешного контакта.'}</p>
             </article>

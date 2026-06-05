@@ -413,31 +413,32 @@ export function getAuditByApplicationId(applicationId: string) {
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0] || null;
   }
 
-  const row = getDb()
-    .prepare('SELECT * FROM audits WHERE application_id = ? ORDER BY updated_at DESC LIMIT 1')
-    .get(applicationId) as Record<string, unknown> | undefined;
-  return row ? mapAudit(row) : null;
+  try {
+    const row = getDb()
+      .prepare('SELECT * FROM audits WHERE application_id = ? ORDER BY updated_at DESC LIMIT 1')
+      .get(applicationId) as Record<string, unknown> | undefined;
+    return row ? mapAudit(row) : null;
+  } catch {
+    disableSqlite();
+    return readStore().audits
+      .filter((audit) => audit.applicationId === applicationId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0] || null;
+  }
 }
 
 export function upsertAudit(applicationId: string, draft: AuditDraft, status: AuditRecord['status'] = 'draft') {
-  if (!canUseSqlite()) {
+  const upsertInJsonStore = () => {
     const store = readStore();
     const now = new Date().toISOString();
     const existing = store.audits
       .filter((audit) => audit.applicationId === applicationId)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
     if (existing) {
-      const updated = {
-        ...existing,
-        ...draft,
-        status,
-        updatedAt: now
-      };
+      const updated = { ...existing, ...draft, status, updatedAt: now };
       store.audits = store.audits.map((audit) => audit.id === existing.id ? updated : audit);
       writeStore(store);
       return updated;
     }
-
     const audit: AuditRecord = {
       ...draft,
       id: `AUD-${Date.now().toString(36).toUpperCase()}`,
@@ -449,9 +450,10 @@ export function upsertAudit(applicationId: string, draft: AuditDraft, status: Au
     store.audits.unshift(audit);
     writeStore(store);
     return audit;
-  }
+  };
 
-  const existing = getAuditByApplicationId(applicationId);
+  if (!canUseSqlite()) return upsertInJsonStore();
+
   const now = new Date().toISOString();
   const args = [
     status,
@@ -465,32 +467,37 @@ export function upsertAudit(applicationId: string, draft: AuditDraft, status: Au
     now
   ];
 
-  if (existing) {
+  try {
+    const existing = getAuditByApplicationId(applicationId);
+    if (existing) {
+      getDb()
+        .prepare(`
+          UPDATE audits
+          SET status = ?, overall_score = ?, readiness_level = ?, verdict = ?, summary = ?,
+              blocks_json = ?, recommendations_json = ?, roadmap_json = ?, updated_at = ?
+          WHERE id = ?
+        `)
+        .run(...args, existing.id);
+      return getAuditByApplicationId(applicationId);
+    }
+    const id = `AUD-${Date.now().toString(36).toUpperCase()}`;
     getDb()
       .prepare(`
-        UPDATE audits
-        SET status = ?, overall_score = ?, readiness_level = ?, verdict = ?, summary = ?,
-            blocks_json = ?, recommendations_json = ?, roadmap_json = ?, updated_at = ?
-        WHERE id = ?
+        INSERT INTO audits (
+          id, application_id, status, overall_score, readiness_level, verdict, summary,
+          blocks_json, recommendations_json, roadmap_json, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `)
-      .run(...args, existing.id);
+      .run(id, applicationId, ...args, now);
     return getAuditByApplicationId(applicationId);
+  } catch {
+    disableSqlite();
+    return upsertInJsonStore();
   }
-
-  const id = `AUD-${Date.now().toString(36).toUpperCase()}`;
-  getDb()
-    .prepare(`
-      INSERT INTO audits (
-        id, application_id, status, overall_score, readiness_level, verdict, summary,
-        blocks_json, recommendations_json, roadmap_json, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `)
-    .run(id, applicationId, ...args, now);
-  return getAuditByApplicationId(applicationId);
 }
 
 export function updateAudit(audit: Pick<AuditRecord, 'id' | 'status' | 'overallScore' | 'readinessLevel' | 'verdict' | 'summary' | 'blocks' | 'recommendations' | 'roadmap'>) {
-  if (!canUseSqlite()) {
+  const updateInJsonStore = () => {
     const store = readStore();
     let updatedAudit: AuditRecord | null = null;
     store.audits = store.audits.map((existing) => {
@@ -504,28 +511,36 @@ export function updateAudit(audit: Pick<AuditRecord, 'id' | 'status' | 'overallS
     });
     writeStore(store);
     return updatedAudit;
+  };
+
+  if (!canUseSqlite()) {
+    return updateInJsonStore();
   }
 
-  getDb()
-    .prepare(`
-      UPDATE audits
-      SET status = ?, overall_score = ?, readiness_level = ?, verdict = ?, summary = ?,
-          blocks_json = ?, recommendations_json = ?, roadmap_json = ?, updated_at = ?
-      WHERE id = ?
-    `)
-    .run(
-      audit.status,
-      audit.overallScore,
-      audit.readinessLevel,
-      audit.verdict,
-      audit.summary,
-      JSON.stringify(audit.blocks),
-      JSON.stringify(audit.recommendations),
-      JSON.stringify(audit.roadmap),
-      new Date().toISOString(),
-      audit.id
-    );
-
-  const row = getDb().prepare('SELECT * FROM audits WHERE id = ?').get(audit.id) as Record<string, unknown> | undefined;
-  return row ? mapAudit(row) : null;
+  try {
+    getDb()
+      .prepare(`
+        UPDATE audits
+        SET status = ?, overall_score = ?, readiness_level = ?, verdict = ?, summary = ?,
+            blocks_json = ?, recommendations_json = ?, roadmap_json = ?, updated_at = ?
+        WHERE id = ?
+      `)
+      .run(
+        audit.status,
+        audit.overallScore,
+        audit.readinessLevel,
+        audit.verdict,
+        audit.summary,
+        JSON.stringify(audit.blocks),
+        JSON.stringify(audit.recommendations),
+        JSON.stringify(audit.roadmap),
+        new Date().toISOString(),
+        audit.id
+      );
+    const row = getDb().prepare('SELECT * FROM audits WHERE id = ?').get(audit.id) as Record<string, unknown> | undefined;
+    return row ? mapAudit(row) : null;
+  } catch {
+    disableSqlite();
+    return updateInJsonStore();
+  }
 }

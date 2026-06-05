@@ -24,15 +24,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: 'Не указан ID заявки.' }, { status: 400 });
   }
 
-  const application = await getApplication(applicationId);
-  if (!application) {
-    return NextResponse.json({ message: 'Заявка не найдена.' }, { status: 404 });
+  try {
+    const application = await getApplication(applicationId);
+    if (!application) {
+      return NextResponse.json({ message: 'Заявка не найдена.' }, { status: 404 });
+    }
+    return NextResponse.json({
+      application,
+      audit: await getAuditByApplicationId(applicationId)
+    });
+  } catch {
+    return NextResponse.json({ message: 'Ошибка сервера при загрузке данных аудита.' }, { status: 500 });
   }
-
-  return NextResponse.json({
-    application,
-    audit: await getAuditByApplicationId(applicationId)
-  });
 }
 
 export async function POST(request: NextRequest) {
@@ -50,13 +53,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: 'Не указан ID заявки.' }, { status: 400 });
   }
 
-  const application = await getApplication(body.applicationId);
-  if (!application) {
-    return NextResponse.json({ message: 'Заявка не найдена.' }, { status: 404 });
+  try {
+    const application = await getApplication(body.applicationId);
+    if (!application) {
+      return NextResponse.json({ message: 'Заявка не найдена.' }, { status: 404 });
+    }
+    const audit = await upsertAudit(application.id, generateAuditDraft(application), 'draft');
+    return NextResponse.json({ application, audit });
+  } catch {
+    return NextResponse.json({ message: 'Ошибка сервера при создании аудита.' }, { status: 500 });
   }
-
-  const audit = await upsertAudit(application.id, generateAuditDraft(application), 'draft');
-  return NextResponse.json({ application, audit });
 }
 
 export async function PATCH(request: NextRequest) {
@@ -77,18 +83,21 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ message: 'Некорректная структура аудита.' }, { status: 400 });
   }
 
-  const audit = await updateAudit({
-    id: body.id,
-    status: body.status,
-    overallScore: Number(body.overallScore || 0),
-    readinessLevel: String(body.readinessLevel || ''),
-    verdict: String(body.verdict || ''),
-    summary: String(body.summary || ''),
-    blocks: body.blocks,
-    recommendations: body.recommendations.map(String),
-    roadmap: body.roadmap.map(String)
-  });
-
-  if (!audit) return NextResponse.json({ message: 'Аудит не найден.' }, { status: 404 });
-  return NextResponse.json({ audit });
+  try {
+    const audit = await updateAudit({
+      id: body.id,
+      status: body.status,
+      overallScore: Number(body.overallScore || 0),
+      readinessLevel: String(body.readinessLevel || ''),
+      verdict: String(body.verdict || ''),
+      summary: String(body.summary || ''),
+      blocks: body.blocks,
+      recommendations: body.recommendations.map(String),
+      roadmap: body.roadmap.map(String)
+    });
+    if (!audit) return NextResponse.json({ message: 'Аудит не найден.' }, { status: 404 });
+    return NextResponse.json({ audit });
+  } catch {
+    return NextResponse.json({ message: 'Ошибка сервера при сохранении аудита.' }, { status: 500 });
+  }
 }
