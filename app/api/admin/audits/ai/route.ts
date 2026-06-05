@@ -35,7 +35,10 @@ export async function POST(request: NextRequest) {
     const audit = await upsertAudit(application.id, draft, 'expert_review');
     return NextResponse.json({ application, audit });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Не удалось сформировать AI-аудит.';
+    const rawMessage = error instanceof Error ? error.message : '';
+    const message = rawMessage.includes('OPENAI_API_KEY')
+      ? 'AI-аудит пока не настроен: добавьте OPENAI_API_KEY в переменные окружения. Черновой аудит можно сформировать обычной кнопкой.'
+      : rawMessage || 'Не удалось сформировать AI-аудит.';
     return NextResponse.json({ message }, { status: 502 });
   }
 }
