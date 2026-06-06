@@ -51,8 +51,8 @@ type Audit = {
 const footerText = 'Данные и оценки носят экспертный характер и являются условными.';
 
 function scoreClass(score: number) {
-  if (score >= 75) return 'good';
-  if (score >= 60) return 'mid';
+  if (score >= 76) return 'good';
+  if (score >= 61) return 'mid';
   return 'bad';
 }
 
@@ -80,14 +80,18 @@ function blockIcon(blockId: string) {
 }
 
 function kpiIcon(title: string) {
-  if (/рынок|аналог|масштаб|объем|объём/i.test(title)) return 'market';
+  if (/рынок|аналог|масштаб|объем|объём|оборот/i.test(title)) return 'market';
   if (/цена|марж/i.test(title)) return 'price';
-  if (/упаков/i.test(title)) return 'pack';
-  if (/логист|постав/i.test(title)) return 'truck';
-  if (/сайт|публич/i.test(title)) return 'globe';
-  if (/команд|переговор/i.test(title)) return 'people';
-  if (/надеж|стабил|сертифик/i.test(title)) return 'shield';
-  if (/презентац|материал|кп/i.test(title)) return 'screen';
+  if (/упаков|визуал/i.test(title)) return 'pack';
+  if (/логист|постав|географ/i.test(title)) return 'truck';
+  if (/сайт|цифров|публич/i.test(title)) return 'globe';
+  if (/команд|переговор|опыт|выставк/i.test(title)) return 'people';
+  if (/надеж|стабил|финанс/i.test(title)) return 'shield';
+  if (/презентац|материал|кп|качество/i.test(title)) return 'screen';
+  if (/категор|соответств|формат/i.test(title)) return 'target';
+  if (/производств/i.test(title)) return 'database';
+  if (/потенциал|первичн/i.test(title)) return 'star';
+  if (/репутац/i.test(title)) return 'star';
   return 'list';
 }
 
@@ -137,9 +141,10 @@ function SlideFooter() {
 }
 
 function readinessText(score: number) {
-  if (score >= 75) return 'высокий';
-  if (score >= 60) return 'средний';
-  if (score >= 40) return 'низкий';
+  if (score >= 91) return 'сильный';
+  if (score >= 76) return 'высокий';
+  if (score >= 61) return 'средний';
+  if (score >= 41) return 'низкий';
   return 'критичный';
 }
 
@@ -290,25 +295,26 @@ export default function AuditPresentationPage() {
 
       <section className="clientSlide networkReportSlide" id="slide-5">
         <SlideHeader page={5} />
-        <h1>5. Релевантность к актуальным запросам сетей</h1>
+        <h1>5. {blocks[3]?.title || 'Релевантность к актуальным запросам сетей'}</h1>
         <p>Потенциально релевантные сети и форматы входа для продукта {application.productName}</p>
         <div className="networkSlideGrid">
           <div>
-            <h2>Какие форматы подходят больше всего</h2>
-            <div className="auditTable">
-              <div className="auditTableHead"><span>№</span><span>Формат</span><span>Комментарий</span><span>Релевантность</span></div>
-              {['Канал удобства / food-to-go', 'Специализированный / ЗОЖ', 'Гипер / супер', 'Супермаркет', 'Магазины у дома'].map((format, index) => (
-                <div className="auditTableRow" key={format}>
-                  <b>{index + 1}</b>
-                  <span>{format}</span>
-                  <p>{application.category}: формат может быть релевантен при подтверждении цены, объёмов и стабильности поставок.</p>
-                  <em className={index < 2 ? 'good' : 'mid'}>{index < 2 ? 'высокая' : 'средняя'}</em>
-                </div>
+            <h2>Оценка релевантности</h2>
+            <div className="kpiTable reportKpiTable">
+              {(blocks[3]?.kpis || []).slice(0, 4).map((kpi) => (
+                <article className={scoreClass(kpi.score)} key={kpi.id}>
+                  <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
+                  <div>
+                    <h3>{kpi.title}</h3>
+                    <p>{kpi.comment}</p>
+                  </div>
+                  <b>{kpi.score}%</b>
+                </article>
               ))}
             </div>
           </div>
           <div>
-            <h2>Рекомендуемые сети с комфортным входом</h2>
+            <h2>Потенциально релевантные сети</h2>
             <div className="auditTable">
               <div className="auditTableHead"><span>№</span><span>Сеть / формат</span><span>Комментарий</span><span>Порог входа</span></div>
               {(networkRows.length ? networkRows : ['ВкусВилл', 'Пятёрочка', 'Лента', 'Перекрёсток', 'Магнит']).map((network, index) => (
@@ -324,7 +330,7 @@ export default function AuditPresentationPage() {
         </div>
         <div className="keyConclusion networkConclusion">
           <strong>Ключевой вывод</strong>
-          <p>{blocks[3]?.conclusion || `Наибольший потенциал входа есть в сетях: ${networks}. Для успешного входа критичны экономика, объёмы и доказанная релевантность категории.`}</p>
+          <p>{blocks[3]?.conclusion || `Потенциальные сети для входа: ${networks}. Для успешного входа критичны экономика, объёмы и доказанная релевантность категории.`}</p>
         </div>
         <SlideFooter />
       </section>
@@ -374,7 +380,7 @@ export default function AuditPresentationPage() {
               <b>{index + 1}</b>
               <div className="slideIcon"><PresentationIcon kind={index === 4 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : 'target'} /></div>
               <h3>{item}</h3>
-              <p>{index === 5 ? 'Получаете доступ к сетям, переговорам и реальным возможностям для входа.' : 'Усиливает аргументацию, закрывает слабые места и повышает шанс успешного контакта.'}</p>
+              <p>{index === 4 ? 'Получаете готовый пакет для первого контакта с закупщиком и реальные шансы на вход в сеть.' : 'Усиливает аргументацию, закрывает слабые места и повышает шанс успешного контакта.'}</p>
             </article>
           ))}
         </div>
