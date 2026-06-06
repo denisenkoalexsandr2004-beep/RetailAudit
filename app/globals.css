@@ -4701,9 +4701,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   height: 18px;
 }
 
-.improvementTable article.bad em {
-  color: #ef4444;
-}
+.improvementTable article em.bad  { color: #ef4444; }
+.improvementTable article em.mid  { color: #facc15; }
+.improvementTable article em.good { color: #22c55e; }
 
 .timelineRoadmap {
   position: relative;
@@ -5100,6 +5100,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 
 .dashGaugeWrap svg {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .dashGaugeContent {
@@ -5136,6 +5138,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 
 .blockGaugeWrap svg {
   display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .blockGaugeContent {
@@ -5179,6 +5183,97 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border-radius: inherit;
   width: var(--bar-w, 0%);
   background: var(--bar-c, #facc15);
+}
+
+/* ─── Network logo badges ────────────────────────────────────────────────── */
+
+.networkBadgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-content: start;
+}
+
+.networkBadgeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 8px;
+  padding: 10px 8px;
+  background: rgba(255,255,255,.03);
+  text-align: center;
+}
+
+.networkBadgeLogo {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #ff6a32;
+  color: #ffffff;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .02em;
+}
+
+.networkBadgeName {
+  color: #ffffff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.networkBadgeCard em {
+  display: block;
+  font-style: normal;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+}
+
+.networkBadgeCard em.good { color: #22c55e; }
+.networkBadgeCard em.mid  { color: #facc15; }
+
+/* brand colours */
+.nb-vv      { background: #41aa43; }
+.nb-pyat    { background: #d0021b; }
+.nb-perek   { background: #1a9347; }
+.nb-magnit  { background: #c30b23; }
+.nb-lenta   { background: #1e2a78; }
+.nb-metro   { background: #0b3d91; }
+.nb-auchan  { background: #e55400; }
+.nb-spar    { background: #007a3d; }
+.nb-dixi    { background: #e63b2e; }
+.nb-wb      { background: #7b219f; }
+.nb-ozon    { background: #005bff; }
+.nb-fp      { background: #ff8000; }
+.nb-samokat { background: #ff4b55; }
+.nb-ym      { background: #fc3f1d; }
+.nb-globus  { background: #0e5ba8; }
+.nb-bristol { background: #003087; }
+.nb-kb      { background: #9b1c2e; }
+.nb-default { background: #ff6a32; }
+
+/* reportPresentation compacted badge grid */
+.reportPresentation .networkBadgeGrid {
+  gap: 6px;
+}
+
+.reportPresentation .networkBadgeLogo {
+  width: 44px;
+  height: 44px;
+  font-size: 12px;
+}
+
+.reportPresentation .networkBadgeName {
+  font-size: 9.5px;
 }
 
 /* ─── reportPresentation gauge overrides ─────────────────────────────────── */

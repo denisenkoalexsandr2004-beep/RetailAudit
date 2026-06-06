@@ -165,6 +165,59 @@ function BlockGauge({ score }: { score: number }) {
   );
 }
 
+// ─── network logo badges ───────────────────────────────────────────────────────
+
+type NetworkBrand = { short: string; cls: string };
+
+const BRANDS: Array<{ match: string; brand: NetworkBrand }> = [
+  { match: 'вкусвилл',   brand: { short: 'ВВ',  cls: 'nb-vv'      } },
+  { match: 'пятёрочк',   brand: { short: '5!',  cls: 'nb-pyat'    } },
+  { match: 'пятерочк',   brand: { short: '5!',  cls: 'nb-pyat'    } },
+  { match: 'перекрёст',  brand: { short: 'П+',  cls: 'nb-perek'   } },
+  { match: 'перекрест',  brand: { short: 'П+',  cls: 'nb-perek'   } },
+  { match: 'магнит',     brand: { short: 'М',   cls: 'nb-magnit'  } },
+  { match: 'лента',      brand: { short: 'Л',   cls: 'nb-lenta'   } },
+  { match: 'metro',      brand: { short: 'M',   cls: 'nb-metro'   } },
+  { match: 'метро',      brand: { short: 'M',   cls: 'nb-metro'   } },
+  { match: 'ашан',       brand: { short: 'А',   cls: 'nb-auchan'  } },
+  { match: 'spar',       brand: { short: 'S',   cls: 'nb-spar'    } },
+  { match: 'спар',       brand: { short: 'S',   cls: 'nb-spar'    } },
+  { match: 'дикси',      brand: { short: 'Д',   cls: 'nb-dixi'    } },
+  { match: 'wildberries',brand: { short: 'WB',  cls: 'nb-wb'      } },
+  { match: 'ozon',       brand: { short: 'OZ',  cls: 'nb-ozon'    } },
+  { match: 'озон',       brand: { short: 'OZ',  cls: 'nb-ozon'    } },
+  { match: 'fix price',  brand: { short: 'FP',  cls: 'nb-fp'      } },
+  { match: 'fixprice',   brand: { short: 'FP',  cls: 'nb-fp'      } },
+  { match: 'фикс',       brand: { short: 'FP',  cls: 'nb-fp'      } },
+  { match: 'самокат',    brand: { short: 'СМ',  cls: 'nb-samokat' } },
+  { match: 'яндекс',     brand: { short: 'ЯМ',  cls: 'nb-ym'      } },
+  { match: 'глобус',     brand: { short: 'ГЛ',  cls: 'nb-globus'  } },
+  { match: 'бристоль',   brand: { short: 'Б',   cls: 'nb-bristol' } },
+  { match: 'красное',    brand: { short: 'К&Б', cls: 'nb-kb'      } },
+];
+
+function brandFor(name: string): NetworkBrand {
+  const lower = name.toLowerCase();
+  for (const { match, brand } of BRANDS) {
+    if (lower.includes(match)) return brand;
+  }
+  return { short: name.slice(0, 2).toUpperCase(), cls: 'nb-default' };
+}
+
+const BADGE_LABELS = ['актуально', 'актуально', 'потенциал', 'потенциал', 'уточнить', 'в листе', 'в листе'];
+
+function NetworkBadge({ name, index }: { name: string; index: number }) {
+  const brand = brandFor(name);
+  const label = BADGE_LABELS[Math.min(index, BADGE_LABELS.length - 1)];
+  return (
+    <div className="networkBadgeCard">
+      <div className={`networkBadgeLogo ${brand.cls}`}>{brand.short}</div>
+      <span className="networkBadgeName">{name}</span>
+      <em className={index < 2 ? 'good' : index < 4 ? 'mid' : ''}>{label}</em>
+    </div>
+  );
+}
+
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
 const footerText = 'Данные и оценки носят экспертный характер и являются условными.';
@@ -412,7 +465,7 @@ export default function AuditPresentationPage() {
                     <h3>{kpi.title}</h3>
                     <p>{kpi.comment}</p>
                     <div className="kpiBar">
-                      <span style={{ width: `${kpi.score}%`, background: scoreColor(kpi.score) }} />
+                      <span style={{ '--bar-w': `${kpi.score}%`, '--bar-c': scoreColor(kpi.score) } as CSSProperties} />
                     </div>
                   </div>
                   <b>{kpi.score}%</b>
@@ -422,15 +475,9 @@ export default function AuditPresentationPage() {
           </div>
           <div>
             <h2>Потенциально релевантные сети</h2>
-            <div className="auditTable">
-              <div className="auditTableHead"><span>№</span><span>Сеть / формат</span><span>Комментарий</span><span>Порог входа</span></div>
-              {(networkRows.length ? networkRows : ['ВкусВилл', 'Пятёрочка', 'Лента', 'Перекрёсток', 'Магнит']).map((network, index) => (
-                <div className="auditTableRow" key={`${network}-${index}`}>
-                  <b>{index + 1}</b>
-                  <span>{network}</span>
-                  <p>Нужны подтверждённые УТП, экономика, условия поставки и готовность к первому контакту.</p>
-                  <em className={index < 2 ? 'good' : index < 4 ? 'mid' : 'bad'}>{index < 2 ? 'низкий' : index < 4 ? 'средний' : 'высокий'}</em>
-                </div>
+            <div className="networkBadgeGrid">
+              {(networkRows.length ? networkRows : ['ВкусВилл', 'Пятёрочка', 'Лента', 'Перекрёсток', 'Магнит', 'METRO']).map((network, index) => (
+                <NetworkBadge key={`${network}-${index}`} name={network} index={index} />
               ))}
             </div>
           </div>
@@ -457,7 +504,7 @@ export default function AuditPresentationPage() {
               <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
               <h3>{kpi.title}</h3>
               <p>{kpi.comment}</p>
-              <em>{readinessText(kpi.score)}</em>
+              <em className={kpi.score < 41 ? 'bad' : kpi.score < 61 ? 'mid' : 'good'}>{readinessText(kpi.score)}</em>
             </article>
           ))}
         </div>
