@@ -230,8 +230,17 @@ function networksFor(application: Application) {
   return application.networkNames || application.targetNetworks || 'целевые розничные сети';
 }
 
-function splitNetworks(value: string) {
-  return value.split(/[,;\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 7);
+function splitNetworks(value: string): string[] {
+  const result: string[] = [];
+  for (const part of value.split(/[|;]+/)) {
+    // strip category prefix e.g. "Федеральные: " / "Региональные: "
+    const stripped = part.replace(/^[^:]+:\s*/, '').trim();
+    for (const name of stripped.split(/[,\n]+/)) {
+      const n = name.trim();
+      if (n.length > 1) result.push(n);
+    }
+  }
+  return [...new Set(result)].slice(0, 9);
 }
 
 function blockIcon(blockId: string) {
@@ -357,7 +366,7 @@ export default function AuditPresentationPage() {
   const strongest = useMemo(() => [...blocks].sort((a, b) => b.score - a.score)[0], [blocks]);
   const weakest = useMemo(() => [...blocks].sort((a, b) => a.score - b.score)[0], [blocks]);
   const riskKpis = useMemo(
-    () => blocks.flatMap((block) => block.kpis.map((kpi) => ({ ...kpi, blockTitle: block.title }))).sort((a, b) => a.score - b.score).slice(0, 5),
+    () => blocks.flatMap((block) => block.kpis.map((kpi) => ({ ...kpi, blockTitle: block.title }))).sort((a, b) => a.score - b.score).slice(0, 4),
     [blocks]
   );
 
@@ -429,7 +438,7 @@ export default function AuditPresentationPage() {
             <div>
               <h2 className="kpiTableTitle">Из чего складывается оценка</h2>
               <div className="kpiTable reportKpiTable">
-                {block.kpis.slice(0, 6).map((kpi) => (
+                {block.kpis.slice(0, 5).map((kpi) => (
                   <article className={scoreClass(kpi.score)} key={kpi.id}>
                     <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
                     <div>
@@ -458,7 +467,7 @@ export default function AuditPresentationPage() {
           <div>
             <h2>Оценка релевантности</h2>
             <div className="kpiTable reportKpiTable">
-              {(blocks[3]?.kpis || []).slice(0, 4).map((kpi) => (
+              {(blocks[3]?.kpis || []).slice(0, 3).map((kpi) => (
                 <article className={scoreClass(kpi.score)} key={kpi.id}>
                   <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
                   <div>
