@@ -160,7 +160,7 @@ nav{
 .what-photo img{width:100%;height:370px;object-fit:cover;display:block}
 .photo-badge{
   position:absolute;bottom:16px;left:16px;right:16px;
-  background:rgba(7,15,38,.93);backdrop-filter:blur(8px);
+  background:rgba(7,15,38,.93);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   border-radius:8px;padding:14px 16px;border:1px solid rgba(232,76,48,.3);
 }
 .pb-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:5px}
@@ -188,7 +188,7 @@ nav{
 .photo-cell img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s}
 .photo-cell:hover img{transform:scale(1.05)}
 .photos-controls{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
-.photos-controls button{pointer-events:auto;width:48px;height:48px;border:1px solid rgba(11,31,75,.16);border-radius:50%;background:rgba(255,255,255,.9);color:var(--navy);font-family:var(--ff-h);font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 18px 42px rgba(11,31,75,.16);backdrop-filter:blur(14px);transition:all .22s ease}
+.photos-controls button{pointer-events:auto;width:48px;height:48px;border:1px solid rgba(11,31,75,.16);border-radius:50%;background:rgba(255,255,255,.9);color:var(--navy);font-family:var(--ff-h);font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 18px 42px rgba(11,31,75,.16);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);transition:all .22s ease}
 .photos-controls button:hover{border-color:rgba(232,76,48,.42);color:var(--coral);transform:translateY(-1px) scale(1.04);box-shadow:0 22px 52px rgba(11,31,75,.2)}
 
 /* ── PRICING ── */
@@ -461,6 +461,28 @@ textarea.ft{resize:vertical;min-height:100px}
   .hstat-num{font-size:26px}
   .trust-inner,.network-list{grid-template-columns:1fr}
 }
+@media(hover:none){
+  .btn-hero:active{background:var(--coral2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(232,76,48,.4)}
+  .btn-hero-out:active{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
+  .btn-nav:active{background:var(--coral2);transform:translateY(-1px)}
+  .btn-price:active{background:var(--coral2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,76,48,.35)}
+  .pcard:not(.ft) .btn-price:active{background:#122e78;box-shadow:0 6px 20px rgba(11,31,75,.3)}
+  .wpoint:active{border-color:var(--coral);box-shadow:0 4px 18px rgba(232,76,48,.1);transform:translateX(4px)}
+  .step:active{border-color:var(--coral);background:rgba(232,76,48,.05)}
+  .step:active .step-n{color:var(--coral)}
+  .pcard:active{border-color:var(--coral);transform:translateY(-4px);box-shadow:0 20px 52px rgba(11,31,75,.12)}
+  .hp:active img,.hp-big:active img{transform:scale(1.04)}
+  .photo-cell:active img{transform:scale(1.05)}
+  .photos-controls button:active{border-color:rgba(232,76,48,.42);color:var(--coral);transform:scale(1.04)}
+  .phone-country-btn:active{border-color:var(--coral);box-shadow:0 0 0 3px rgba(232,76,48,.1)}
+  .phone-country-option:active{background:rgba(232,76,48,.08);transform:translateX(2px)}
+  .tariff-switch button:active{transform:translateY(-2px);box-shadow:0 18px 34px rgba(11,31,75,.1)}
+  .filebox:active{border-color:var(--coral);background:rgba(232,76,48,.04)}
+  .voice-btn:active{border-color:var(--coral);background:var(--coral);color:var(--white)}
+  .btn-bk:active,.btn-f:active{opacity:.88}
+  .network-chip:active{border-color:var(--coral)}
+}
+button,a,[role=button]{touch-action:manipulation}
 </style>
 </head>
 <body>

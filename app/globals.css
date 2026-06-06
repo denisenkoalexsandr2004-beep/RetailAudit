@@ -21,11 +21,13 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
+button, a { touch-action: manipulation; }
 
 .exactLandingFrame {
   display: block;
   width: 100%;
   height: 100vh;
+  height: 100dvh;
   border: 0;
   background: var(--white);
 }
@@ -41,6 +43,7 @@ button, input, select, textarea { font: inherit; }
   padding: 0 48px;
   background: rgba(6, 20, 49, .94);
   color: var(--white);
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; }
@@ -450,6 +453,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   padding: 0 36px;
   background: rgba(7,15,38,.96);
   border-bottom: 1px solid rgba(255,255,255,.08);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
@@ -1323,6 +1327,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border: 1px solid rgba(232,76,48,.32);
   border-radius: 8px;
   background: rgba(7,15,38,.93);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -2991,7 +2996,133 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   }
 }
 
+@media (max-width: 640px) {
+  .adminExactContainer {
+    padding: 0 16px;
+  }
 
+  .adminExactNav {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .adminExactHero {
+    padding: 38px 0 28px;
+  }
+
+  .adminExactHeroGrid {
+    gap: 24px;
+  }
+
+  .adminExactLogin {
+    padding: 16px;
+    gap: 10px;
+  }
+
+  .adminExactStats {
+    gap: 14px 20px;
+    padding: 16px;
+  }
+
+  .adminExactWork {
+    padding-top: 24px;
+    padding-bottom: 48px;
+    gap: 14px;
+  }
+
+  .adminExactSectionHead h2 {
+    font-size: 26px;
+  }
+
+  .adminExactListFilter {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .adminExactListFilter button {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .adminExactList button,
+  .adminExactEmpty {
+    padding: 14px 14px 14px 46px;
+  }
+
+  .adminExactLeadNo {
+    top: 12px;
+    left: 12px;
+  }
+
+  .adminExactPipeline {
+    gap: 6px;
+  }
+
+  .adminExactDetails {
+    border-radius: 14px;
+  }
+
+  .adminExactDetails header {
+    padding: 18px 16px;
+    gap: 14px;
+  }
+
+  .adminExactInfoBlock {
+    padding: 14px;
+  }
+
+  .adminExactInfoBlock h3 {
+    font-size: 15px;
+  }
+
+  .adminExactGrid {
+    gap: 8px;
+  }
+
+  .adminExactGrid div {
+    min-height: 70px;
+    padding: 11px 12px;
+  }
+
+  .adminExactGrid b {
+    font-size: 13px;
+  }
+}
+
+@media (hover: none) {
+  .adminExactStats button:active {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(11,31,75,.1);
+  }
+
+  .adminExactList button:active {
+    box-shadow: 0 4px 18px rgba(11,31,75,.1);
+    transform: translateX(4px);
+  }
+
+  .adminExactListFilter button:active {
+    transform: translateY(-1px);
+    border-color: var(--status-color, var(--ae-coral));
+    background: var(--status-bg, rgba(232,76,48,.1));
+    color: var(--status-color, var(--ae-coral));
+  }
+
+  .adminExactGrid div:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(11,31,75,.09);
+  }
+
+  .adminExactLinks a:active,
+  .adminExactLogout:active {
+    color: var(--ae-white);
+  }
+
+  .applicationList button:active {
+    transform: translateY(-1px);
+    border-color: rgba(232,76,48,.45);
+    box-shadow: 0 14px 34px rgba(11,31,75,.1);
+  }
+}
 
 /* Audit Studio */
 .auditStudio .auditStudioHero {
@@ -3621,6 +3752,65 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   }
 }
 
+@media (max-width: 640px) {
+  .auditStudio .auditStudioHero {
+    padding-bottom: 26px;
+  }
+
+  .auditScorePanel {
+    padding: 16px;
+  }
+
+  .auditScorePanel b {
+    font-size: 54px;
+  }
+
+  .auditStudioWork {
+    padding-top: 20px;
+    padding-bottom: 44px;
+    gap: 14px;
+  }
+
+  .auditStudioSidebar section {
+    padding: 14px;
+  }
+
+  .auditStudioSidebar h2 {
+    font-size: 20px;
+  }
+
+  .auditStudioToolbar {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .auditStudioBlockHead {
+    padding: 14px;
+  }
+
+  .auditStudioKpis {
+    gap: 14px;
+    padding: 0 14px 14px;
+  }
+
+  .auditStudioKpis article {
+    padding: 14px;
+  }
+
+  .auditStudioLists {
+    padding: 14px;
+    gap: 14px;
+  }
+}
+
+@media (hover: none) {
+  .auditStudioBlocks button:active {
+    border-color: var(--ae-coral);
+    background: rgba(232,76,48,.06);
+    transform: translateY(-1px);
+  }
+}
+
 .auditPresentation {
   min-height: 100vh;
   padding: 82px 0 36px;
@@ -3641,6 +3831,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border-radius: 12px;
   padding: 8px;
   background: rgba(7,15,38,.88);
+  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   box-shadow: 0 18px 44px rgba(0,0,0,.28);
 }
@@ -4137,6 +4328,33 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   color: #ff6a32;
   font-family: Montserrat, Arial, sans-serif;
   font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .auditPresentation {
+    padding: 68px 0 22px;
+  }
+
+  .auditPresentationControls {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    transform: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .clientSlide {
+    width: calc(100vw - 18px);
+    padding: 22px 16px 46px;
+  }
+
+  .reportPresentation .auditPresentationControls {
+    width: auto;
+    margin: 0 10px 16px;
+  }
 }
 
 @media print {
