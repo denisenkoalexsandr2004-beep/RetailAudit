@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 
 type Application = {
@@ -48,13 +48,126 @@ type Audit = {
   roadmap: string[];
 };
 
-const footerText = 'Данные и оценки носят экспертный характер и являются условными.';
+// ─── colours ──────────────────────────────────────────────────────────────────
+
+function scoreColor(score: number) {
+  if (score >= 76) return '#22c55e';
+  if (score >= 61) return '#facc15';
+  return '#ef4444';
+}
 
 function scoreClass(score: number) {
   if (score >= 76) return 'good';
   if (score >= 61) return 'mid';
   return 'bad';
 }
+
+function readinessText(score: number) {
+  if (score >= 91) return 'сильный';
+  if (score >= 76) return 'высокий';
+  if (score >= 61) return 'средний';
+  if (score >= 41) return 'низкий';
+  return 'критичный';
+}
+
+// ─── SVG gauges ───────────────────────────────────────────────────────────────
+
+function GaugeSvg({ score, size, sw }: { score: number; size: number; sw: number }) {
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const cx = size / 2;
+  const cy = size / 2;
+  const pct = Math.max(0, Math.min(1, score / 100));
+  const color = scoreColor(score);
+  const filled = pct * circ;
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+      <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,.1)" strokeWidth={sw} />
+      {pct > 0 && pct < 1 && (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw}
+          strokeDasharray={`${filled.toFixed(2)} ${(circ - filled).toFixed(2)}`}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${cx} ${cy})`} />
+      )}
+      {pct >= 1 && (
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw} />
+      )}
+    </svg>
+  );
+}
+
+function DashGauge({ score }: { score: number }) {
+  const size = 224;
+  const sw = 20;
+  const r = (size - sw) / 2;
+  const circ = 2 * Math.PI * r;
+  const cx = size / 2;
+  const cy = size / 2;
+  const pct = Math.max(0, Math.min(1, score / 100));
+  const filled = pct * circ;
+  const color = scoreColor(score);
+
+  // Three static background arcs: red 0-40%, yellow 40-75%, green 75-100%
+  const seg0 = 0.40 * circ;
+  const seg1 = 0.35 * circ;
+  const seg2 = 0.25 * circ;
+
+  return (
+    <div className="dashGaugeWrap">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+        {/* background track */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(255,255,255,.06)" strokeWidth={sw} />
+        {/* red 0–40% */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#ef4444" strokeWidth={sw}
+          strokeDasharray={`${seg0.toFixed(2)} ${(circ - seg0).toFixed(2)}`}
+          opacity={0.38}
+          transform={`rotate(-90 ${cx} ${cy})`} />
+        {/* yellow 40–75% */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#facc15" strokeWidth={sw}
+          strokeDasharray={`${seg1.toFixed(2)} ${(circ - seg1).toFixed(2)}`}
+          strokeDashoffset={(-seg0).toFixed(2)}
+          opacity={0.38}
+          transform={`rotate(-90 ${cx} ${cy})`} />
+        {/* green 75–100% */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#22c55e" strokeWidth={sw}
+          strokeDasharray={`${seg2.toFixed(2)} ${(circ - seg2).toFixed(2)}`}
+          strokeDashoffset={(-(seg0 + seg1)).toFixed(2)}
+          opacity={0.38}
+          transform={`rotate(-90 ${cx} ${cy})`} />
+        {/* score fill */}
+        {filled > 0 && (
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth={sw}
+            strokeDasharray={`${filled.toFixed(2)} ${(circ - filled).toFixed(2)}`}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${cx} ${cy})`}
+            opacity={0.92} />
+        )}
+      </svg>
+      <div className="dashGaugeContent">
+        <span>Вы набрали</span>
+        <b>{score}</b>
+        <em>балла из 100</em>
+      </div>
+    </div>
+  );
+}
+
+function BlockGauge({ score }: { score: number }) {
+  return (
+    <div className="blockGaugeWrap">
+      <GaugeSvg score={score} size={170} sw={15} />
+      <div className={`blockGaugeContent ${scoreClass(score)}`}>
+        <b>{score}%</b>
+        <span>готовность</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+const footerText = 'Данные и оценки носят экспертный характер и являются условными.';
 
 function today() {
   return new Date().toLocaleDateString('ru-RU');
@@ -65,11 +178,7 @@ function networksFor(application: Application) {
 }
 
 function splitNetworks(value: string) {
-  return value
-    .split(/[,;\n]/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 7);
+  return value.split(/[,;\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 7);
 }
 
 function blockIcon(blockId: string) {
@@ -90,8 +199,7 @@ function kpiIcon(title: string) {
   if (/презентац|материал|кп|качество/i.test(title)) return 'screen';
   if (/категор|соответств|формат/i.test(title)) return 'target';
   if (/производств/i.test(title)) return 'database';
-  if (/потенциал|первичн/i.test(title)) return 'star';
-  if (/репутац/i.test(title)) return 'star';
+  if (/потенциал|первичн|репутац/i.test(title)) return 'star';
   return 'list';
 }
 
@@ -116,9 +224,10 @@ function PresentationIcon({ kind }: { kind: string }) {
     calendar: <><path d="M4 5h16v15H4z" /><path d="M8 3v4M16 3v4M4 9h16" /></>,
     database: <><ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" /><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" /></>
   };
-
   return <svg viewBox="0 0 24 24" aria-hidden="true">{paths[kind] || paths.list}</svg>;
 }
+
+// ─── slide chrome ─────────────────────────────────────────────────────────────
 
 function SlideHeader({ page }: { page: number }) {
   return (
@@ -140,13 +249,21 @@ function SlideFooter() {
   );
 }
 
-function readinessText(score: number) {
-  if (score >= 91) return 'сильный';
-  if (score >= 76) return 'высокий';
-  if (score >= 61) return 'средний';
-  if (score >= 41) return 'низкий';
-  return 'критичный';
+function KeyConclusion({ text, compact }: { text: string; compact?: boolean }) {
+  return (
+    <div className={`keyConclusion${compact ? ' compact' : ''}`}>
+      <div className="keyConclusionIcon">
+        <PresentationIcon kind="bulb" />
+      </div>
+      <div>
+        <strong>Ключевой вывод</strong>
+        <p>{text}</p>
+      </div>
+    </div>
+  );
 }
+
+// ─── page ─────────────────────────────────────────────────────────────────────
 
 export default function AuditPresentationPage() {
   const params = useParams<{ id: string }>();
@@ -163,7 +280,6 @@ export default function AuditPresentationPage() {
       setError('Нужен вход в админку.');
       return;
     }
-
     fetch(`/api/admin/audits?applicationId=${encodeURIComponent(applicationId)}`, {
       headers: { 'x-admin-token': saved }
     })
@@ -187,17 +303,12 @@ export default function AuditPresentationPage() {
   const blocks = audit?.blocks || [];
   const strongest = useMemo(() => [...blocks].sort((a, b) => b.score - a.score)[0], [blocks]);
   const weakest = useMemo(() => [...blocks].sort((a, b) => a.score - b.score)[0], [blocks]);
-  const riskKpis = useMemo(() => {
-    return blocks
-      .flatMap((block) => block.kpis.map((kpi) => ({ ...kpi, blockTitle: block.title })))
-      .sort((a, b) => a.score - b.score)
-      .slice(0, 4);
-  }, [blocks]);
+  const riskKpis = useMemo(
+    () => blocks.flatMap((block) => block.kpis.map((kpi) => ({ ...kpi, blockTitle: block.title }))).sort((a, b) => a.score - b.score).slice(0, 5),
+    [blocks]
+  );
 
-  if (loading) {
-    return <main className="auditPresentationState">Готовлю клиентскую презентацию...</main>;
-  }
-
+  if (loading) return <main className="auditPresentationState">Готовлю клиентскую презентацию...</main>;
   if (error || !application || !audit) {
     return (
       <main className="auditPresentationState">
@@ -218,6 +329,7 @@ export default function AuditPresentationPage() {
         <button type="button" onClick={() => window.print()}>Сохранить PDF</button>
       </div>
 
+      {/* ── Слайд 1: Дашборд ───────────────────────────────────────────── */}
       <section className="clientSlide dashboardSlide" id="slide-1">
         <SlideHeader page={1} />
         <div className="dashboardGrid">
@@ -225,15 +337,8 @@ export default function AuditPresentationPage() {
             <h1>Дашборд готовности к переговорам с сетями</h1>
             <p>Поставщик: <strong>{application.company}</strong></p>
             <p>Продукт для оценки: {application.productName} | {application.category}</p>
-            <div className={`bigGauge ${scoreClass(audit.overallScore)}`}>
-              <span>Вы набрали</span>
-              <b>{audit.overallScore}</b>
-              <em>балла из 100</em>
-            </div>
-            <div className="keyConclusion">
-              <strong>Ключевой вывод</strong>
-              <p>{audit.verdict}</p>
-            </div>
+            <DashGauge score={audit.overallScore} />
+            <KeyConclusion text={audit.verdict} />
           </div>
           <aside>
             <h2>Из чего формируется общий балл</h2>
@@ -243,7 +348,7 @@ export default function AuditPresentationPage() {
                 <div>
                   <h3>{index + 1}. {block.title}</h3>
                   <p>{block.goal}</p>
-                  <i><span style={{ width: `${block.score}%` }} /></i>
+                  <i><span style={{ '--bar-w': `${block.score}%` } as CSSProperties} /></i>
                 </div>
                 <b>{block.score}%</b>
               </article>
@@ -254,6 +359,7 @@ export default function AuditPresentationPage() {
         <SlideFooter />
       </section>
 
+      {/* ── Слайды 2-4: блоки продукт / компания / переговоры ─────────── */}
       {blocks.slice(0, 3).map((block, index) => (
         <section className="clientSlide blockSlide" id={`slide-${index + 2}`} key={block.id}>
           <SlideHeader page={index + 2} />
@@ -262,16 +368,10 @@ export default function AuditPresentationPage() {
               <h1>{index + 1}. {block.title}</h1>
               <p>{block.goal}</p>
               <div className="scorePanel">
-                <div className={`blockScore ${scoreClass(block.score)}`}>
-                  <b>{block.score}%</b>
-                  <span>готовность</span>
-                </div>
+                <BlockGauge score={block.score} />
                 <p>Оценка показывает, насколько текущая подготовка закрывает требования сетей по этому блоку.</p>
               </div>
-              <div className="keyConclusion compact">
-                <strong>Ключевой вывод</strong>
-                <p>{block.conclusion}</p>
-              </div>
+              <KeyConclusion text={block.conclusion} compact />
             </div>
             <div>
               <h2 className="kpiTableTitle">Из чего складывается оценка</h2>
@@ -282,6 +382,9 @@ export default function AuditPresentationPage() {
                     <div>
                       <h3>{kpi.title}</h3>
                       <p>{kpi.comment}</p>
+                      <div className="kpiBar">
+                        <span style={{ '--bar-w': `${kpi.score}%`, '--bar-c': scoreColor(kpi.score) } as CSSProperties} />
+                      </div>
                     </div>
                     <b>{kpi.score}%</b>
                   </article>
@@ -293,6 +396,7 @@ export default function AuditPresentationPage() {
         </section>
       ))}
 
+      {/* ── Слайд 5: Релевантность сетям ───────────────────────────────── */}
       <section className="clientSlide networkReportSlide" id="slide-5">
         <SlideHeader page={5} />
         <h1>5. {blocks[3]?.title || 'Релевантность к актуальным запросам сетей'}</h1>
@@ -307,6 +411,9 @@ export default function AuditPresentationPage() {
                   <div>
                     <h3>{kpi.title}</h3>
                     <p>{kpi.comment}</p>
+                    <div className="kpiBar">
+                      <span style={{ width: `${kpi.score}%`, background: scoreColor(kpi.score) }} />
+                    </div>
                   </div>
                   <b>{kpi.score}%</b>
                 </article>
@@ -328,13 +435,11 @@ export default function AuditPresentationPage() {
             </div>
           </div>
         </div>
-        <div className="keyConclusion networkConclusion">
-          <strong>Ключевой вывод</strong>
-          <p>{blocks[3]?.conclusion || `Потенциальные сети для входа: ${networks}. Для успешного входа критичны экономика, объёмы и доказанная релевантность категории.`}</p>
-        </div>
+        <KeyConclusion text={blocks[3]?.conclusion || `Потенциальные сети для входа: ${networks}. Для успешного входа критичны экономика, объёмы и доказанная релевантность категории.`} compact />
         <SlideFooter />
       </section>
 
+      {/* ── Слайд 6: Что улучшить ──────────────────────────────────────── */}
       <section className="clientSlide improvementSlide" id="slide-6">
         <SlideHeader page={6} />
         <div className="improvementHead">
@@ -342,14 +447,11 @@ export default function AuditPresentationPage() {
             <h1>6. Что необходимо улучшить до переговоров</h1>
             <p>Пункты, которые сильнее всего влияют на решение закупщика. Сфокусируйтесь на них в первую очередь.</p>
           </div>
-          <div className="keyConclusion compact">
-            <strong>Ключевой вывод</strong>
-            <p>{audit.verdict}</p>
-          </div>
+          <KeyConclusion text={audit.verdict} compact />
         </div>
         <div className="improvementTable">
           <div className="improvementTableHead"><span>№</span><span>Что улучшить</span><span>Почему это важно</span><span>Приоритет</span></div>
-          {(riskKpis.length ? riskKpis : []).map((kpi, index) => (
+          {riskKpis.map((kpi, index) => (
             <article className={scoreClass(kpi.score)} key={`${kpi.blockTitle}-${kpi.id}`}>
               <b>{index + 1}</b>
               <div className="slideIcon"><PresentationIcon kind={kpiIcon(kpi.title)} /></div>
@@ -362,23 +464,26 @@ export default function AuditPresentationPage() {
         <SlideFooter />
       </section>
 
+      {/* ── Слайд 7: Дорожная карта ────────────────────────────────────── */}
       <section className="clientSlide roadmapReportSlide" id="slide-7">
         <SlideHeader page={7} />
         <div className="improvementHead">
           <div>
             <h1>7. Дорожная карта по входу в сети</h1>
-            <p>Пошаговый план действий на основе проведенного аудита</p>
+            <p>Пошаговый план действий на основе проведённого аудита</p>
           </div>
-          <div className="keyConclusion compact">
-            <strong>Ключевой вывод</strong>
-            <p>Готовность к переговорам может быть повышена при последовательной реализации шагов из этой дорожной карты.</p>
-          </div>
+          <KeyConclusion
+            text={`Ваша готовность к переговорам может быть повышена до 100 при последовательной реализации шагов из этой дорожной карты.`}
+            compact
+          />
         </div>
         <div className="timelineRoadmap">
           {(audit.roadmap.length ? audit.roadmap : audit.recommendations).slice(0, 5).map((item, index) => (
             <article key={`${item}-${index}`}>
               <b>{index + 1}</b>
-              <div className="slideIcon"><PresentationIcon kind={index === 4 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : 'target'} /></div>
+              <div className="slideIcon">
+                <PresentationIcon kind={index === 4 ? 'calendar' : index === 3 ? 'market' : index === 2 ? 'negotiation' : index === 1 ? 'globe' : 'target'} />
+              </div>
               <h3>{item}</h3>
               <p>{index === 4 ? 'Получаете готовый пакет для первого контакта с закупщиком и реальные шансы на вход в сеть.' : 'Усиливает аргументацию, закрывает слабые места и повышает шанс успешного контакта.'}</p>
             </article>
@@ -388,6 +493,7 @@ export default function AuditPresentationPage() {
         <SlideFooter />
       </section>
 
+      {/* ── Слайд 8: Источники ─────────────────────────────────────────── */}
       <section className="clientSlide sourceReportSlide" id="slide-8">
         <SlideHeader page={8} />
         <h1>8. Источники, инструменты и экспертная проверка</h1>
@@ -413,7 +519,7 @@ export default function AuditPresentationPage() {
             <h2>Проверка охватывает</h2>
             <div className="coverage360">360°<span>проверка поставщика</span></div>
             <p>Продукт и рынок</p>
-            <p>Компания и надежность</p>
+            <p>Компания и надёжность</p>
             <p>Переговорная кампания</p>
             <p>Релевантность сетям</p>
           </article>

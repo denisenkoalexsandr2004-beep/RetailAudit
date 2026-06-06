@@ -3810,10 +3810,35 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .keyConclusion {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
   border: 1.5px solid rgba(255,106,50,.75);
   border-radius: 10px;
   padding: 20px;
   background: rgba(232,76,48,.14);
+}
+
+.keyConclusion::before {
+  display: none;
+}
+
+.keyConclusionIcon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff8a00, #ff4d00);
+}
+
+.keyConclusionIcon svg {
+  width: 26px;
+  height: 26px;
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
 }
 
 .keyConclusion strong {
@@ -3898,6 +3923,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 .dashboardGrid aside i span {
   display: block;
   height: 100%;
+  width: var(--bar-w, 0%);
   border-radius: inherit;
   background: #facc15;
 }
@@ -4289,23 +4315,15 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .reportPresentation .dashboardSlide .keyConclusion {
-  display: grid;
-  grid-template-columns: 74px 1fr;
+  align-items: center;
   gap: 14px;
-  min-height: 98px;
-  padding: 16px;
+  min-height: 88px;
+  padding: 14px 16px;
 }
 
-.reportPresentation .dashboardSlide .keyConclusion::before {
-  content: "";
-  width: 58px;
-  height: 58px;
-  display: block;
-  grid-row: span 2;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(255, 255, 255, .22) 0 18%, transparent 20%),
-    linear-gradient(135deg, #ff8a00, #ff4d00);
+.reportPresentation .dashboardSlide .keyConclusionIcon {
+  width: 52px;
+  height: 52px;
 }
 
 .reportPresentation .dashboardSlide .keyConclusion p {
@@ -4313,7 +4331,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .scorePanel {
@@ -4540,13 +4558,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   height: 44px;
 }
 
-.networkConclusion::before,
-.improvementHead .keyConclusion::before {
+.networkConclusion::before {
   content: "";
-  width: 72px;
-  height: 72px;
-  display: block;
-  grid-row: span 2;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
   border-radius: 50%;
   background:
     radial-gradient(circle, rgba(255, 255, 255, .22) 0 18%, transparent 20%),
@@ -4576,11 +4592,20 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .improvementHead .keyConclusion {
-  display: grid;
-  grid-template-columns: 74px 1fr;
-  gap: 14px;
+  align-items: center;
+  gap: 12px;
   min-height: 92px;
   padding: 12px;
+}
+
+.improvementHead .keyConclusionIcon {
+  width: 44px;
+  height: 44px;
+}
+
+.improvementHead .keyConclusionIcon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .improvementHead .keyConclusion p {
@@ -4589,11 +4614,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   font-size: 12px;
-}
-
-.improvementHead .keyConclusion::before {
-  width: 48px;
-  height: 48px;
 }
 
 .improvementTable {
@@ -4907,22 +4927,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   line-height: 1.34;
 }
 
-.reportPresentation .scorePanel {
-  grid-template-columns: 150px 1fr;
-  min-height: 174px;
-  margin: 14px 0;
-  padding: 16px;
-}
-
-.reportPresentation .blockScore {
-  width: 136px;
-  height: 136px;
-  border-width: 10px;
-}
-
-.reportPresentation .blockScore b {
-  font-size: 42px;
-}
 
 .reportPresentation .keyConclusion {
   padding: 14px;
@@ -5083,6 +5087,142 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
     break-after: page;
     page-break-after: always;
   }
+}
+
+/* ─── SVG dash gauge ─────────────────────────────────────────────────────── */
+
+.dashGaugeWrap {
+  position: relative;
+  width: 224px;
+  height: 224px;
+  margin: 20px 0 18px 22px;
+}
+
+.dashGaugeWrap svg {
+  display: block;
+}
+
+.dashGaugeContent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.dashGaugeContent span,
+.dashGaugeContent em {
+  color: rgba(255,255,255,.78);
+  font-size: 15px;
+  font-style: normal;
+}
+
+.dashGaugeContent b {
+  display: block;
+  color: #ffffff;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 72px;
+  line-height: .92;
+}
+
+/* ─── SVG block gauge ────────────────────────────────────────────────────── */
+
+.blockGaugeWrap {
+  position: relative;
+  width: 170px;
+  height: 170px;
+  margin: 18px 0;
+}
+
+.blockGaugeWrap svg {
+  display: block;
+}
+
+.blockGaugeContent {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.blockGaugeContent b {
+  display: block;
+  font-family: Montserrat, Arial, sans-serif;
+  font-size: 48px;
+  line-height: .9;
+  color: #facc15;
+}
+
+.blockGaugeContent.good b { color: #22c55e; }
+.blockGaugeContent.mid  b { color: #facc15; }
+.blockGaugeContent.bad  b { color: #ef4444; }
+
+.blockGaugeContent span {
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+}
+
+/* ─── KPI progress bar ───────────────────────────────────────────────────── */
+
+.kpiBar {
+  overflow: hidden;
+  height: 5px;
+  margin-top: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+}
+
+.kpiBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  width: var(--bar-w, 0%);
+  background: var(--bar-c, #facc15);
+}
+
+/* ─── reportPresentation gauge overrides ─────────────────────────────────── */
+
+.reportPresentation .dashGaugeWrap {
+  width: 196px;
+  height: 196px;
+  margin: 14px 0 14px 28px;
+}
+
+.reportPresentation .dashGaugeContent b {
+  font-size: 60px;
+}
+
+.reportPresentation .blockGaugeWrap {
+  width: 136px;
+  height: 136px;
+  margin: 12px 0;
+}
+
+.reportPresentation .blockGaugeContent b {
+  font-size: 40px;
+}
+
+.reportPresentation .scorePanel {
+  grid-template-columns: 136px 1fr;
+  min-height: 162px;
+  margin: 12px 0 14px;
+  padding: 14px;
+}
+
+.reportPresentation .keyConclusionIcon {
+  width: 42px;
+  height: 42px;
+}
+
+.reportPresentation .keyConclusionIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.reportPresentation .kpiBar {
+  height: 4px;
+  margin-top: 4px;
 }
 
 .methodPresentation {
