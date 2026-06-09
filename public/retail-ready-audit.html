@@ -791,6 +791,11 @@ button,a,[role=button]{touch-action:manipulation}
               </div>
               <div class="network-selected" id="network-selected">Выберите сети из списка или добавьте свою.</div>
               <textarea class="ft" id="f-ans" rows="3" placeholder="Комментарий: уже были переговоры, отказы или есть приоритетные сети." style="margin-top:12px"></textarea>
+              <div class="voice-row" style="margin-top:10px">
+                <span class="voice-note">Нажмите кнопку и расскажите голосом: были ли переговоры, отказы, приоритетные сети.</span>
+                <button class="voice-btn" id="voice-ans" type="button" onclick="toggleVoiceInputAns()">🎙 Голосовой ввод</button>
+                <span class="voice-status" id="voice-status-ans">Голосовой ввод работает через браузер. Если появится запрос — разрешите микрофон.</span>
+              </div>
             </div>
             <span class="ferr" id="e-ans"></span>
           </div>
@@ -1127,8 +1132,14 @@ function fileToPayload(file){
 }
 var voiceRecognizer=null;
 var voiceActive=false;
+var voiceRecognizerAns=null;
+var voiceActiveAns=false;
 function setVoiceStatus(text){
   var el=document.getElementById('voice-status');
+  if(el)el.textContent=text;
+}
+function setVoiceStatusAns(text){
+  var el=document.getElementById('voice-status-ans');
   if(el)el.textContent=text;
 }
 function appendDictationText(field,text){
@@ -1197,6 +1208,62 @@ function toggleVoiceInput(){
     if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
   };
   try{voiceRecognizer.start();}catch(e){stopVoiceInput();}
+}
+function stopVoiceInputAns(){
+  var btn=document.getElementById('voice-ans');
+  voiceActiveAns=false;
+  if(voiceRecognizerAns){
+    try{voiceRecognizerAns.stop();}catch(e){}
+    voiceRecognizerAns=null;
+  }
+  if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+  setVoiceStatusAns('Запись остановлена. Проверьте текст и при необходимости дополните вручную.');
+}
+function toggleVoiceInputAns(){
+  var SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  var btn=document.getElementById('voice-ans');
+  var field=document.getElementById('f-ans');
+  if(!SpeechRecognition){
+    setVoiceStatusAns('Этот браузер не поддерживает распознавание речи. Лучше открыть сайт в Chrome или Edge.');
+    return;
+  }
+  if(voiceActiveAns){stopVoiceInputAns();return;}
+  voiceRecognizerAns=new SpeechRecognition();
+  voiceRecognizerAns.lang='ru-RU';
+  voiceRecognizerAns.interimResults=true;
+  voiceRecognizerAns.continuous=true;
+  voiceRecognizerAns.maxAlternatives=1;
+  voiceActiveAns=true;
+  btn.classList.add('active');
+  btn.textContent='⏹ Остановить';
+  setVoiceStatusAns('Слушаю. Говорите фразами по 5–10 секунд, после паузы текст появится в поле.');
+  voiceRecognizerAns.onresult=function(event){
+    var interim='';
+    for(var i=event.resultIndex;i<event.results.length;i++){
+      var result=event.results[i];
+      if(result.isFinal){appendDictationText(field,result[0].transcript);}
+      else{interim+=result[0].transcript;}
+    }
+    if(interim) setVoiceStatusAns('Распознаю: '+interim.trim());
+  };
+  voiceRecognizerAns.onend=function(){
+    if(voiceActiveAns){
+      setTimeout(function(){
+        try{voiceRecognizerAns&&voiceRecognizerAns.start();}catch(e){}
+      },220);
+      return;
+    }
+    stopVoiceInputAns();
+  };
+  voiceRecognizerAns.onerror=function(event){
+    var msg='Микрофон временно недоступен. Проверьте разрешение браузера и попробуйте ещё раз.';
+    if(event&&event.error==='not-allowed') msg='Микрофон запрещён. В настройках сайта разрешите микрофон и обновите страницу.';
+    if(event&&event.error==='no-speech') msg='Речь не распознана. Попробуйте говорить ближе к микрофону и чуть медленнее.';
+    setVoiceStatusAns(msg);
+    voiceActiveAns=false;
+    if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+  };
+  try{voiceRecognizerAns.start();}catch(e){stopVoiceInputAns();}
 }
 function validate(){
   var ok=true;
