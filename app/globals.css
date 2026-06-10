@@ -21,13 +21,11 @@ body {
 }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; }
-button, a { touch-action: manipulation; }
 
 .exactLandingFrame {
   display: block;
   width: 100%;
   height: 100vh;
-  height: 100dvh;
   border: 0;
   background: var(--white);
 }
@@ -43,7 +41,6 @@ button, a { touch-action: manipulation; }
   padding: 0 48px;
   background: rgba(6, 20, 49, .94);
   color: var(--white);
-  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; }
@@ -453,7 +450,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   padding: 0 36px;
   background: rgba(7,15,38,.96);
   border-bottom: 1px solid rgba(255,255,255,.08);
-  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
 }
 
@@ -1327,7 +1323,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border: 1px solid rgba(232,76,48,.32);
   border-radius: 8px;
   background: rgba(7,15,38,.93);
-  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 
@@ -2996,133 +2991,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   }
 }
 
-@media (max-width: 640px) {
-  .adminExactContainer {
-    padding: 0 16px;
-  }
 
-  .adminExactNav {
-    padding: 12px 16px;
-    gap: 10px;
-  }
-
-  .adminExactHero {
-    padding: 38px 0 28px;
-  }
-
-  .adminExactHeroGrid {
-    gap: 24px;
-  }
-
-  .adminExactLogin {
-    padding: 16px;
-    gap: 10px;
-  }
-
-  .adminExactStats {
-    gap: 14px 20px;
-    padding: 16px;
-  }
-
-  .adminExactWork {
-    padding-top: 24px;
-    padding-bottom: 48px;
-    gap: 14px;
-  }
-
-  .adminExactSectionHead h2 {
-    font-size: 26px;
-  }
-
-  .adminExactListFilter {
-    padding: 10px;
-    gap: 6px;
-  }
-
-  .adminExactListFilter button {
-    padding: 8px 10px;
-    font-size: 10px;
-  }
-
-  .adminExactList button,
-  .adminExactEmpty {
-    padding: 14px 14px 14px 46px;
-  }
-
-  .adminExactLeadNo {
-    top: 12px;
-    left: 12px;
-  }
-
-  .adminExactPipeline {
-    gap: 6px;
-  }
-
-  .adminExactDetails {
-    border-radius: 14px;
-  }
-
-  .adminExactDetails header {
-    padding: 18px 16px;
-    gap: 14px;
-  }
-
-  .adminExactInfoBlock {
-    padding: 14px;
-  }
-
-  .adminExactInfoBlock h3 {
-    font-size: 15px;
-  }
-
-  .adminExactGrid {
-    gap: 8px;
-  }
-
-  .adminExactGrid div {
-    min-height: 70px;
-    padding: 11px 12px;
-  }
-
-  .adminExactGrid b {
-    font-size: 13px;
-  }
-}
-
-@media (hover: none) {
-  .adminExactStats button:active {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 34px rgba(11,31,75,.1);
-  }
-
-  .adminExactList button:active {
-    box-shadow: 0 4px 18px rgba(11,31,75,.1);
-    transform: translateX(4px);
-  }
-
-  .adminExactListFilter button:active {
-    transform: translateY(-1px);
-    border-color: var(--status-color, var(--ae-coral));
-    background: var(--status-bg, rgba(232,76,48,.1));
-    color: var(--status-color, var(--ae-coral));
-  }
-
-  .adminExactGrid div:active {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(11,31,75,.09);
-  }
-
-  .adminExactLinks a:active,
-  .adminExactLogout:active {
-    color: var(--ae-white);
-  }
-
-  .applicationList button:active {
-    transform: translateY(-1px);
-    border-color: rgba(232,76,48,.45);
-    box-shadow: 0 14px 34px rgba(11,31,75,.1);
-  }
-}
 
 /* Audit Studio */
 .auditStudio .auditStudioHero {
@@ -3752,65 +3621,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   }
 }
 
-@media (max-width: 640px) {
-  .auditStudio .auditStudioHero {
-    padding-bottom: 26px;
-  }
-
-  .auditScorePanel {
-    padding: 16px;
-  }
-
-  .auditScorePanel b {
-    font-size: 54px;
-  }
-
-  .auditStudioWork {
-    padding-top: 20px;
-    padding-bottom: 44px;
-    gap: 14px;
-  }
-
-  .auditStudioSidebar section {
-    padding: 14px;
-  }
-
-  .auditStudioSidebar h2 {
-    font-size: 20px;
-  }
-
-  .auditStudioToolbar {
-    padding: 14px;
-    gap: 12px;
-  }
-
-  .auditStudioBlockHead {
-    padding: 14px;
-  }
-
-  .auditStudioKpis {
-    gap: 14px;
-    padding: 0 14px 14px;
-  }
-
-  .auditStudioKpis article {
-    padding: 14px;
-  }
-
-  .auditStudioLists {
-    padding: 14px;
-    gap: 14px;
-  }
-}
-
-@media (hover: none) {
-  .auditStudioBlocks button:active {
-    border-color: var(--ae-coral);
-    background: rgba(232,76,48,.06);
-    transform: translateY(-1px);
-  }
-}
-
 .auditPresentation {
   min-height: 100vh;
   padding: 82px 0 36px;
@@ -3831,7 +3641,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border-radius: 12px;
   padding: 8px;
   background: rgba(7,15,38,.88);
-  -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   box-shadow: 0 18px 44px rgba(0,0,0,.28);
 }
@@ -4226,8 +4035,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 .kpiTable p {
   margin: 0;
   color: rgba(255,255,255,.64);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.32;
 }
 
 .kpiTable b {
@@ -4328,33 +4137,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   color: #ff6a32;
   font-family: Montserrat, Arial, sans-serif;
   font-size: 20px;
-}
-
-@media (max-width: 640px) {
-  .auditPresentation {
-    padding: 68px 0 22px;
-  }
-
-  .auditPresentationControls {
-    left: 10px;
-    right: 10px;
-    width: auto;
-    transform: none;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 6px;
-    border-radius: 8px;
-  }
-
-  .clientSlide {
-    width: calc(100vw - 18px);
-    padding: 22px 16px 46px;
-  }
-
-  .reportPresentation .auditPresentationControls {
-    width: auto;
-    margin: 0 10px 16px;
-  }
 }
 
 @media print {
@@ -4602,7 +4384,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .reportKpiTable h3 {
-  font-size: 14px;
+  font-size: 12.5px;
 }
 
 .reportKpiTable p {
@@ -4610,7 +4392,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  font-size: 13px;
+  font-size: 10px;
 }
 
 .reportKpiTable b {
@@ -4727,8 +4509,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   -webkit-line-clamp: 2;
   margin: 0;
   color: rgba(255, 255, 255, .7);
-  font-size: 12px;
-  line-height: 1.28;
+  font-size: 9px;
+  line-height: 1.22;
 }
 
 .auditTableRow em,
@@ -4891,7 +4673,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   margin: 0;
   color: #ffffff;
   font-family: Montserrat, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
@@ -4902,8 +4684,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   -webkit-line-clamp: 2;
   margin: 0;
   color: rgba(255, 255, 255, .74);
-  font-size: 12px;
-  line-height: 1.28;
+  font-size: 9.5px;
+  line-height: 1.22;
 }
 
 .improvementTable article em {
@@ -4919,9 +4701,9 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   height: 18px;
 }
 
-.improvementTable article em.bad  { color: #ef4444; }
-.improvementTable article em.mid  { color: #facc15; }
-.improvementTable article em.good { color: #22c55e; }
+.improvementTable article.bad em {
+  color: #ef4444;
+}
 
 .timelineRoadmap {
   position: relative;
@@ -4985,26 +4767,26 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 .timelineRoadmap h3 {
   display: -webkit-box;
   overflow: hidden;
-  min-height: 46px;
+  min-height: 42px;
   margin: 0 0 8px;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   color: #ffffff;
   font-family: Montserrat, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.28;
+  font-size: 10.5px;
+  line-height: 1.25;
 }
 
 .timelineRoadmap p {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   margin: 0;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, .12);
   color: rgba(255, 255, 255, .72);
-  font-size: 12px;
+  font-size: 9px;
 }
 
 .importantNote {
@@ -5164,8 +4946,8 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .reportPresentation .reportKpiTable article {
-  min-height: 64px;
-  padding: 8px 10px;
+  min-height: 54px;
+  padding: 7px 10px;
 }
 
 .reportPresentation .reportKpiTable .slideIcon {
@@ -5225,16 +5007,16 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 }
 
 .reportPresentation .improvementTable article {
-  min-height: 68px;
+  min-height: 62px;
 }
 
 .reportPresentation .improvementTable h3 {
-  font-size: 13px;
+  font-size: 11px;
 }
 
 .reportPresentation .improvementTable p {
-  -webkit-line-clamp: 2;
-  font-size: 12px;
+  -webkit-line-clamp: 3;
+  font-size: 9px;
 }
 
 .reportPresentation .timelineRoadmap {
@@ -5318,8 +5100,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 
 .dashGaugeWrap svg {
   display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .dashGaugeContent {
@@ -5356,8 +5136,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
 
 .blockGaugeWrap svg {
   display: block;
-  width: 100%;
-  height: 100%;
 }
 
 .blockGaugeContent {
@@ -5401,97 +5179,6 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   border-radius: inherit;
   width: var(--bar-w, 0%);
   background: var(--bar-c, #facc15);
-}
-
-/* ─── Network logo badges ────────────────────────────────────────────────── */
-
-.networkBadgeGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  align-content: start;
-}
-
-.networkBadgeCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid rgba(255,255,255,.1);
-  border-radius: 8px;
-  padding: 10px 8px;
-  background: rgba(255,255,255,.03);
-  text-align: center;
-}
-
-.networkBadgeLogo {
-  width: 52px;
-  height: 52px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: #ff6a32;
-  color: #ffffff;
-  font-family: Montserrat, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: .02em;
-}
-
-.networkBadgeName {
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.networkBadgeCard em {
-  display: block;
-  font-style: normal;
-  font-family: Montserrat, Arial, sans-serif;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,.5);
-}
-
-.networkBadgeCard em.good { color: #22c55e; }
-.networkBadgeCard em.mid  { color: #facc15; }
-
-/* brand colours */
-.nb-vv      { background: #41aa43; }
-.nb-pyat    { background: #d0021b; }
-.nb-perek   { background: #1a9347; }
-.nb-magnit  { background: #c30b23; }
-.nb-lenta   { background: #1e2a78; }
-.nb-metro   { background: #0b3d91; }
-.nb-auchan  { background: #e55400; }
-.nb-spar    { background: #007a3d; }
-.nb-dixi    { background: #e63b2e; }
-.nb-wb      { background: #7b219f; }
-.nb-ozon    { background: #005bff; }
-.nb-fp      { background: #ff8000; }
-.nb-samokat { background: #ff4b55; }
-.nb-ym      { background: #fc3f1d; }
-.nb-globus  { background: #0e5ba8; }
-.nb-bristol { background: #003087; }
-.nb-kb      { background: #9b1c2e; }
-.nb-default { background: #ff6a32; }
-
-/* reportPresentation compacted badge grid */
-.reportPresentation .networkBadgeGrid {
-  gap: 6px;
-}
-
-.reportPresentation .networkBadgeLogo {
-  width: 44px;
-  height: 44px;
-  font-size: 12px;
-}
-
-.reportPresentation .networkBadgeName {
-  font-size: 9.5px;
 }
 
 /* ─── reportPresentation gauge overrides ─────────────────────────────────── */
@@ -6255,5 +5942,265 @@ input:focus, select:focus, textarea:focus { border-color: var(--coral); box-shad
   }
 }
 
+/* Premium admin refresh */
+.adminExact {
+  --admin-bg: #050b17;
+  --admin-panel: rgba(255, 255, 255, .075);
+  --admin-panel-2: rgba(255, 255, 255, .045);
+  --admin-line: rgba(255, 255, 255, .14);
+  --admin-text: rgba(255, 255, 255, .86);
+  --admin-muted: rgba(255, 255, 255, .58);
+  --admin-coral: #f24b32;
+  min-height: 100vh;
+  color: var(--admin-text);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(242, 75, 50, .18), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(36, 91, 168, .28), transparent 34%),
+    linear-gradient(rgba(255, 255, 255, .032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .032) 1px, transparent 1px),
+    var(--admin-bg);
+  background-size: auto, auto, 110px 110px, 110px 110px, auto;
+  font-family: Manrope, Montserrat, Arial, sans-serif;
+}
+
+.adminExactContainer {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+}
+
+.adminExactNav {
+  min-height: 88px;
+  padding: 0 max(32px, calc((100vw - 1440px) / 2 + 32px));
+  background: rgba(3, 8, 19, .86);
+  border-bottom: 1px solid rgba(255, 255, 255, .1);
+  backdrop-filter: blur(20px);
+}
+
+.adminExactBrandBadge,
+.adminExactNav button,
+.adminExactNav a {
+  border-radius: 14px;
+}
+
+.adminExactBrandBadge {
+  color: #fff;
+  background: rgba(242, 75, 50, .13);
+  border: 1px solid rgba(242, 75, 50, .48);
+}
+
+.adminExactHero {
+  padding: 92px 0 70px;
+  background: transparent;
+}
+
+.adminExactHero h1 {
+  max-width: 900px;
+  color: #fff;
+  font-size: clamp(56px, 5.6vw, 104px);
+  line-height: .92;
+  letter-spacing: 0;
+}
+
+.adminExactHero p,
+.adminExactHero span,
+.adminExactSectionHead p {
+  color: var(--admin-muted);
+}
+
+.adminExactHero strong,
+.adminExactSectionHead h2,
+.adminExactDetails h2,
+.adminExactInfoBlock h3 {
+  color: #fff;
+}
+
+.adminExactLogin,
+.adminExactSession,
+.adminExactDetails,
+.adminExactInfoBlock,
+.adminExactList button,
+.adminExactEmpty {
+  background:
+    radial-gradient(circle at 92% 0%, rgba(36, 91, 168, .18), transparent 30%),
+    linear-gradient(135deg, var(--admin-panel), var(--admin-panel-2));
+  border: 1px solid var(--admin-line);
+  box-shadow: 0 26px 80px rgba(0, 0, 0, .34);
+  color: var(--admin-text);
+}
+
+.adminExactLogin,
+.adminExactSession {
+  border-radius: 28px;
+  padding: 28px;
+}
+
+.adminExactLogin input,
+.adminExactSearch input,
+.adminExactSearch select,
+.adminExact textarea,
+.adminExact select {
+  min-height: 50px;
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(3, 9, 22, .72);
+  border: 1px solid rgba(255, 255, 255, .14);
+}
+
+.adminExactLogin input::placeholder,
+.adminExactSearch input::placeholder,
+.adminExact textarea::placeholder {
+  color: rgba(255, 255, 255, .34);
+}
+
+.adminExact button,
+.adminExact a {
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.adminExact button:hover,
+.adminExact a:hover {
+  transform: translateY(-1px);
+}
+
+.adminExactPrimary,
+.adminExactLogin button[type="submit"],
+.adminExactNav .adminExactCta {
+  border: 0;
+  color: #fff;
+  background: var(--admin-coral);
+  box-shadow: 0 18px 46px rgba(242, 75, 50, .26);
+}
+
+.adminExactStats {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 18px 0 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.adminExactStats button,
+.adminExactStats a {
+  min-height: 112px;
+  border-radius: 22px;
+  color: var(--admin-text);
+  background: linear-gradient(135deg, var(--admin-panel), var(--admin-panel-2));
+  border: 1px solid var(--admin-line);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, .22);
+}
+
+.adminExactStats strong {
+  color: #fff;
+  font-size: 30px;
+}
+
+.adminExactStats span {
+  color: var(--admin-muted);
+}
+
+.adminExactWork {
+  width: min(1440px, calc(100% - 64px));
+  margin: 0 auto;
+  padding: 42px 0 96px;
+  display: grid;
+  grid-template-columns: 420px minmax(0, 1fr);
+  gap: 24px;
+}
+
+.adminExactListFilter,
+.adminExactPipeline {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, .22);
+}
+
+.adminExactList button,
+.adminExactEmpty {
+  border-radius: 20px;
+}
+
+.adminExactList button:hover {
+  border-color: rgba(242, 75, 50, .5);
+  background:
+    radial-gradient(circle at 95% 0%, rgba(242, 75, 50, .12), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .05));
+}
+
+.adminExactDetails {
+  border-radius: 30px;
+  padding: 30px;
+}
+
+.adminExactPipeline {
+  padding: 16px;
+  gap: 10px;
+}
+
+.adminExactStage {
+  min-height: 72px;
+  border-radius: 16px;
+  color: rgba(255, 255, 255, .6);
+  background: rgba(3, 9, 22, .52);
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+
+.adminExactStage.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(242, 75, 50, .32), rgba(242, 75, 50, .14));
+  border-color: rgba(242, 75, 50, .5);
+}
+
+.adminExactInfoBlock {
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.adminExactGrid div,
+.adminExactInfoBlock li,
+.adminExactMetaCard {
+  border-radius: 16px;
+  color: var(--admin-text);
+  background: rgba(3, 9, 22, .48);
+  border: 1px solid rgba(255, 255, 255, .1);
+}
+
+.adminExactGrid span,
+.adminExactInfoBlock small,
+.adminExactMetaCard span {
+  color: var(--admin-muted);
+}
+
+.adminExactGrid b,
+.adminExactMetaCard b {
+  color: #fff;
+}
+
+@media (max-width: 1100px) {
+  .adminExactContainer,
+  .adminExactStats,
+  .adminExactWork {
+    width: min(100% - 36px, 760px);
+  }
+
+  .adminExactStats,
+  .adminExactWork {
+    grid-template-columns: 1fr;
+  }
+
+  .adminExactNav {
+    min-height: 76px;
+    padding: 0 18px;
+  }
+
+  .adminExactHero {
+    padding: 54px 0 42px;
+  }
+
+  .adminExactHero h1 {
+    font-size: clamp(42px, 14vw, 68px);
+  }
+}
 
 
