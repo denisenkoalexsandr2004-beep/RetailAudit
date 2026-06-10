@@ -36,8 +36,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ application, audit });
   } catch (error) {
     const rawMessage = error instanceof Error ? error.message : '';
-    const message = rawMessage.includes('OPENAI_API_KEY')
-      ? 'AI-аудит пока не настроен: добавьте OPENAI_API_KEY в переменные окружения. Черновой аудит можно сформировать обычной кнопкой.'
+    const message = rawMessage.includes('ANTHROPIC_API_KEY')
+      ? 'AI-аудит пока не настроен: добавьте ANTHROPIC_API_KEY в переменные окружения. Черновой аудит можно сформировать обычной кнопкой.'
       : rawMessage || 'Не удалось сформировать AI-аудит.';
     return NextResponse.json({ message }, { status: 502 });
   }
