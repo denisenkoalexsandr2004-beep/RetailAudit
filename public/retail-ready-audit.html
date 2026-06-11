@@ -2239,6 +2239,137 @@ body::before{
   filter:drop-shadow(0 0 8px rgba(255,255,255,.2));
 }
 
+/* Timeweb readability pass: lighter site, larger microcopy, brighter application flow */
+body{
+  background:
+    radial-gradient(circle at 18% 7%,rgba(232,76,48,.18),transparent 24%),
+    radial-gradient(circle at 80% 16%,rgba(76,136,218,.28),transparent 32%),
+    linear-gradient(180deg,#0b1830 0%,#112d63 42%,#0b1830 100%)!important;
+  color:rgba(255,255,255,.92)!important;
+}
+.hero{
+  background:
+    linear-gradient(rgba(255,255,255,.036) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.032) 1px,transparent 1px),
+    radial-gradient(circle at 48% 16%,rgba(232,76,48,.24),transparent 25%),
+    radial-gradient(circle at 74% 42%,rgba(76,136,218,.42),transparent 31%),
+    linear-gradient(145deg,#081225 0%,#102a58 48%,#153a78 100%)!important;
+}
+.what,.pricing,.photos-sec,.trust,.cta,.how{
+  background-color:#0b1830!important;
+}
+.mq,footer{
+  background:rgba(8,18,37,.94)!important;
+}
+.hero p{
+  font-size:17px!important;
+  color:rgba(255,255,255,.7)!important;
+}
+.hero-subtitle,
+.sec-sub,
+.cta p{
+  color:rgba(255,255,255,.72)!important;
+}
+.sec-sub{font-size:17px!important}
+.chip span{font-size:13px!important;color:rgba(255,255,255,.78)!important}
+.czs-tag-txt,.hstat-lbl,.trust-lbl,.pb-label,.ptag,.ribbon,.footer-copy{
+  font-size:12px!important;
+}
+.mq-item{font-size:14px!important;color:rgba(255,255,255,.84)!important}
+.wpoint-t,.step-t{font-size:17px!important;color:#fff!important}
+.wpoint-d,.step-d,.pfeat li{
+  font-size:15px!important;
+  color:rgba(255,255,255,.72)!important;
+}
+.pb-text{font-size:15px!important;color:#fff!important}
+.footer-brand{font-size:15px!important;color:rgba(255,255,255,.58)!important}
+.panel,
+.wpoint,.step,.pcard{
+  background:rgba(255,255,255,.085)!important;
+  border-color:rgba(255,255,255,.16)!important;
+}
+.wpoint:hover,.step:hover,.pcard:hover{
+  background:rgba(232,76,48,.12)!important;
+  border-color:rgba(232,76,48,.58)!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.22),0 0 34px rgba(232,76,48,.12)!important;
+}
+.form-wrap{
+  background:
+    radial-gradient(circle at 46% 0%,rgba(255,123,86,.34),transparent 30%),
+    radial-gradient(circle at 78% 18%,rgba(86,151,235,.48),transparent 36%),
+    linear-gradient(rgba(255,255,255,.052) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(145deg,#10254a 0%,#173e7b 50%,#122b58 100%)!important;
+  background-size:auto,auto,110px 110px,110px 110px,auto!important;
+  color:#fff!important;
+}
+.czs-banner,
+.fcard{
+  background:
+    radial-gradient(circle at 88% 4%,rgba(255,138,82,.22),transparent 30%),
+    linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.1))!important;
+  border-color:rgba(255,255,255,.26)!important;
+  box-shadow:0 34px 100px rgba(5,13,30,.28),0 0 44px rgba(232,76,48,.12)!important;
+}
+.form-wrap h1,
+.form-wrap h2,
+.form-wrap h3,
+.form-wrap .fhero h1,
+.form-wrap .form-title,
+.form-wrap .section-title{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+.form-wrap .fsub,
+.form-wrap .fhero p,
+.form-wrap .form-subtitle,
+.form-wrap .section-subtitle{
+  font-size:18px!important;
+  color:rgba(255,255,255,.78)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.78)!important;
+}
+.flbl,.radio-title,.file-title{
+  font-size:13px!important;
+  color:#fff!important;
+}
+.radio-desc,.file-desc,.hint,.tariff-note,.network-selected,.voice-note,.voice-status{
+  font-size:13px!important;
+  color:rgba(255,255,255,.74)!important;
+}
+.fi,.fs,.ft,.phone-country-btn{
+  background:#fff8f3!important;
+  color:#111827!important;
+  border-color:rgba(255,255,255,.46)!important;
+  box-shadow:0 14px 34px rgba(5,13,30,.16),inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+.fi::placeholder,.ft::placeholder{
+  color:rgba(17,24,39,.48)!important;
+}
+.fi:focus,.fs:focus,.ft:focus,.phone-combo:focus-within{
+  background:#fff!important;
+  border-color:rgba(255,138,82,.9)!important;
+  box-shadow:0 0 0 5px rgba(255,138,82,.2),0 16px 38px rgba(5,13,30,.18)!important;
+}
+input.fi:-webkit-autofill{
+  -webkit-text-fill-color:#111827!important;
+  box-shadow:0 0 0 1000px #fff8f3 inset!important;
+}
+.tariff-switch button,.radio-card,.filebox,.voice-row,.network-picker,.consent-box{
+  background:rgba(255,255,255,.14)!important;
+  border-color:rgba(255,255,255,.24)!important;
+  color:rgba(255,255,255,.88)!important;
+}
+.consent-box,
+.consent-box span,
+.consent-box label,
+.consent-box p,
+.consent-box a,
+.consent-box strong,
+.consent-box b{
+  font-size:14px!important;
+  color:rgba(255,255,255,.9)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.9)!important;
+}
 </style>
 </head>
 <body>
