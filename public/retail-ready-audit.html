@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Retail Ready Аудит — Центр Закупок Сетей™</title>
+<title>Ритейл контракт — Сейл Трекер</title>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -539,7 +539,7 @@ nav{
   background-size:90px 90px,90px 90px,auto,auto,auto;
 }
 .hero::before{
-  content:'Retail Ready';
+  content:'Ритейл контракт';
   position:absolute;
   left:50%;
   top:52px;
@@ -1729,7 +1729,7 @@ body::before{
   font-size:0!important;
 }
 .czs-banner-logo::before{
-  content:"ЦЗС"!important;
+  content:none!important;
   display:grid!important;
   place-items:center!important;
   width:100%!important;
@@ -2088,6 +2088,15 @@ body::before{
     border-color:rgba(255,255,255,.1)!important;
   }
   .hstat-num{font-size:34px!important}
+  .pgrid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    max-width:1260px!important;
+  }
+  .pcard{padding:32px 28px!important}
+  .pamount{font-size:clamp(32px,2.8vw,42px)!important}
+}
+@media(max-width:1080px){
+  .pgrid{grid-template-columns:1fr!important;max-width:720px!important}
 }
 @media (min-width:1500px){
   .hero-grid{
@@ -2097,14 +2106,147 @@ body::before{
   .hero h1{font-size:84px!important}
 }
 
+/* Final brand and process hover tuning */
+.steps .step{
+  position:relative!important;
+  overflow:hidden!important;
+}
+.steps .step:hover{
+  transform:none!important;
+  border-color:rgba(232,76,48,.64)!important;
+  background:
+    radial-gradient(circle at var(--spot-x,50%) var(--spot-y,28%),rgba(232,76,48,.28),transparent 34%),
+    linear-gradient(135deg,rgba(232,76,48,.16),rgba(255,255,255,.055))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    inset 0 0 0 1px rgba(232,76,48,.28),
+    0 0 42px rgba(232,76,48,.14)!important;
+}
+.steps .step:hover .step-n{
+  color:rgba(232,76,48,.72)!important;
+}
+.steps .step:hover .step-icon{
+  color:var(--coral)!important;
+  border-color:rgba(232,76,48,.68)!important;
+  background:rgba(232,76,48,.13)!important;
+  box-shadow:0 0 26px rgba(232,76,48,.22)!important;
+}
+.steps .step:hover .step-t{color:#fff!important}
+.steps .step:hover .step-d{color:rgba(255,255,255,.7)!important}
+.czs-banner-logo{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-family:var(--ff-h)!important;
+  font-weight:900!important;
+  font-size:18px!important;
+}
+
+/* Semantic line icon set */
+.wpoint-icon,
+.step-icon,
+.file-ico{
+  position:relative!important;
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:13px!important;
+  color:var(--coral)!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  background:
+    radial-gradient(circle at 32% 18%,rgba(232,76,48,.22),transparent 34%),
+    linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.032))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 14px 34px rgba(0,0,0,.2)!important;
+}
+.wpoint-icon::before,
+.wpoint-icon::after,
+.step-icon::before,
+.step-icon::after,
+.file-ico::before,
+.file-ico::after{
+  content:''!important;
+  position:absolute!important;
+  inset:10px!important;
+  width:auto!important;
+  height:auto!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent center/contain no-repeat!important;
+  box-shadow:none!important;
+  transform:none!important;
+  opacity:1!important;
+  clip-path:none!important;
+}
+.wpoint-icon::before,
+.step-icon::before,
+.file-ico::before{
+  filter:drop-shadow(0 0 8px rgba(232,76,48,.2));
+}
+.icon-audit::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 4H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M9 4.5A2.5 2.5 0 0 1 11.5 2h1A2.5 2.5 0 0 1 15 4.5V6H9V4.5Z' stroke='%23e84c30' stroke-width='1.8'/%3E%3Cpath d='m9 13 2 2 4-5' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+}
+.icon-score::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4h8l3 3v13H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z' stroke='%23e84c30' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M15 4v4h4M8.5 13.5h7M8.5 17h5' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='M9 10h3' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-plan::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 7a3 3 0 1 0 6 0 3 3 0 0 0-6 0ZM13 17a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z' stroke='%23e84c30' stroke-width='1.8'/%3E%3Cpath d='M11 7h3.5A3.5 3.5 0 0 1 18 10.5v3M13 17H9.5A3.5 3.5 0 0 1 6 13.5V11' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-access::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m8.5 12.5 2.2 2.2a3 3 0 0 0 4.2 0l2.6-2.6a3 3 0 0 0 0-4.2l-.4-.4a3 3 0 0 0-4.2 0l-.9.9' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3Cpath d='m15.5 11.5-2.2-2.2a3 3 0 0 0-4.2 0l-2.6 2.6a3 3 0 0 0 0 4.2l.4.4a3 3 0 0 0 4.2 0l.9-.9' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-form::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4h10a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z' stroke='%23e84c30' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M9 9h6M9 13h4M9 17h6' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-confirm::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z' stroke='%23e84c30' stroke-width='1.8'/%3E%3Cpath d='M12 7v5l3 3' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M8 16.5h8' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-pay::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='4' y='5' width='16' height='14' rx='2' stroke='%23e84c30' stroke-width='1.8'/%3E%3Cpath d='M8 9h8M8 13h5M8 16h8' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-search::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='9' cy='9' r='4' stroke='%23e84c30' stroke-width='1.8'/%3E%3Cpath d='m12.2 12.2 3.3 3.3M17 6.5h2M18 5.5v2M17 17h2M18 16v2M5 17h2M6 16v2' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-report::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-4 4v-4.2A2.5 2.5 0 0 1 5 12.5v-6Z' stroke='%23e84c30' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M9 8h6M9 11.5h4' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+}
+.icon-retail::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 4h7l3 3v13H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z' stroke='%23e84c30' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M14 4v4h4M8.5 14l2 2 4.5-5' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+}
+.file-ico{
+  font-size:0!important;
+}
+.file-ico::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 12.5 13.8 6.7a3 3 0 0 1 4.2 4.2l-7 7a4.5 4.5 0 0 1-6.4-6.4l7.2-7.2' stroke='%23e84c30' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")!important;
+}
+.voice-btn{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+}
+.voice-btn::before{
+  content:''!important;
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px!important;
+  background:center/contain no-repeat url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 2.25a2.25 2.25 0 0 0-2.25 2.25v4.125a2.25 2.25 0 0 0 4.5 0V4.5A2.25 2.25 0 0 0 9 2.25Z' stroke='%23e84c30' stroke-width='1.55'/%3E%3Cpath d='M4.5 8.25a4.5 4.5 0 0 0 9 0M9 12.75v3M6.75 15.75h4.5' stroke='%23e84c30' stroke-width='1.55' stroke-linecap='round'/%3E%3C/svg%3E")!important;
+  filter:drop-shadow(0 0 8px rgba(232,76,48,.18));
+}
+.voice-btn.active::before{
+  background-image:url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 18 18' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='5' y='5' width='8' height='8' rx='1.5' stroke='white' stroke-width='1.7'/%3E%3C/svg%3E")!important;
+  filter:drop-shadow(0 0 8px rgba(255,255,255,.2));
+}
+
 </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-brand" onclick="showLanding()">
-    <div class="czs-pill">Центр Закупок Сетей™</div>
-    <div class="nav-title">Retail Ready <span>Аудит</span></div>
+    <div class="czs-pill">Сейл Трекер</div>
+    <div class="nav-title">Ритейл <span>контракт</span></div>
   </div>
   <div class="nav-links" id="nav-main">
     <a href="#what">О программе</a>
@@ -2126,21 +2268,21 @@ body::before{
         <div class="fu">
           <div class="czs-tag">
             <div class="czs-dot"></div>
-            <span class="czs-tag-txt">Проект Центра Закупок Сетей™</span>
+            <span class="czs-tag-txt">Платформа Сейл Трекер</span>
           </div>
-          <h1>Retail Ready<br><span class="rr">Аудит</span></h1>
-          <div class="hero-subtitle">Готовим поставщиков к входу в розничные сети</div>
-          <p><span class="hero-line">Узнайте, готов ли ваш продукт к переговорам с закупщиками</span><span class="hero-line">Экспертный аудит от команды Центра Закупок Сетей™</span><span class="hero-proof-line">25 лет опыта и доступ к 2 000+ закупщикам ведущих сетей России.</span></p>
+          <h1>Ритейл<br><span class="rr">контракт</span></h1>
+          <div class="hero-subtitle">Вводим поставщиков в розничные сети до договора поставки</div>
+          <p><span class="hero-line">Диагностика готовности, проверка КП, подбор сетей и переговоры</span><span class="hero-line">Не продаём контакты — создаём управляемый путь к контракту</span><span class="hero-proof-line">26 лет опыта, 350+ сетей и понятная обратная связь от закупщиков.</span></p>
           <div class="hero-btns">
-            <button class="btn-hero" onclick="showForm()">Подать заявку на аудит</button>
+            <button class="btn-hero" onclick="showForm()">Пройти диагностику</button>
             <a href="#what" class="btn-hero-out">Узнать подробнее</a>
           </div>
         </div>
         <div class="hero-stats fu2">
-          <div class="hstat"><div class="hstat-num">25</div><div class="hstat-lbl">Лет опыта</div></div>
-          <div class="hstat"><div class="hstat-num">35 000+</div><div class="hstat-lbl">Переговоров</div></div>
-          <div class="hstat"><div class="hstat-num">80%</div><div class="hstat-lbl">Успешных</div></div>
-          <div class="hstat"><div class="hstat-num">48 ч</div><div class="hstat-lbl">Аудит</div></div>
+          <div class="hstat"><div class="hstat-num">26</div><div class="hstat-lbl">лет переговоров</div></div>
+          <div class="hstat"><div class="hstat-num">350+</div><div class="hstat-lbl">сетей в опыте</div></div>
+          <div class="hstat"><div class="hstat-num">36 000+</div><div class="hstat-lbl">договорённостей</div></div>
+          <div class="hstat"><div class="hstat-num">80%</div><div class="hstat-lbl">эффективность</div></div>
         </div>
       </div>
       <div class="hero-right fu3">
@@ -2168,8 +2310,8 @@ body::before{
 
 <div class="mq">
   <div class="mq-track">
-    <span class="mq-item"><b>✦</b>Центр Закупок Сетей™</span><span class="mq-item"><b>✦</b>Retail Ready Аудит</span><span class="mq-item"><b>✦</b>ВкусВилл</span><span class="mq-item"><b>✦</b>Пятёрочка</span><span class="mq-item"><b>✦</b>Магнит</span><span class="mq-item"><b>✦</b>Перекрёсток</span><span class="mq-item"><b>✦</b>Лента</span><span class="mq-item"><b>✦</b>Ашан</span><span class="mq-item"><b>✦</b>NEVA BUYERS WEEK</span><span class="mq-item"><b>✦</b>Центр Закупок Сетей</span>
-    <span class="mq-item"><b>✦</b>Центр Закупок Сетей™</span><span class="mq-item"><b>✦</b>Retail Ready Аудит</span><span class="mq-item"><b>✦</b>ВкусВилл</span><span class="mq-item"><b>✦</b>Пятёрочка</span><span class="mq-item"><b>✦</b>Магнит</span><span class="mq-item"><b>✦</b>Перекрёсток</span><span class="mq-item"><b>✦</b>Лента</span><span class="mq-item"><b>✦</b>Ашан</span><span class="mq-item"><b>✦</b>NEVA BUYERS WEEK</span><span class="mq-item"><b>✦</b>Центр Закупок Сетей</span>
+    <span class="mq-item"><b>✦</b>Сейл Трекер</span><span class="mq-item"><b>✦</b>Ритейл контракт</span><span class="mq-item"><b>✦</b>Вход в сети</span><span class="mq-item"><b>✦</b>Диагностика поставщика</span><span class="mq-item"><b>✦</b>Проверка КП</span><span class="mq-item"><b>✦</b>Переговоры с сетями</span><span class="mq-item"><b>✦</b>Обратная связь закупщика</span><span class="mq-item"><b>✦</b>Договор поставки</span><span class="mq-item"><b>✦</b>350+ сетей</span><span class="mq-item"><b>✦</b>36 000+ договорённостей</span>
+    <span class="mq-item"><b>✦</b>Сейл Трекер</span><span class="mq-item"><b>✦</b>Ритейл контракт</span><span class="mq-item"><b>✦</b>Вход в сети</span><span class="mq-item"><b>✦</b>Диагностика поставщика</span><span class="mq-item"><b>✦</b>Проверка КП</span><span class="mq-item"><b>✦</b>Переговоры с сетями</span><span class="mq-item"><b>✦</b>Обратная связь закупщика</span><span class="mq-item"><b>✦</b>Договор поставки</span><span class="mq-item"><b>✦</b>350+ сетей</span><span class="mq-item"><b>✦</b>36 000+ договорённостей</span>
   </div>
 </div>
 
@@ -2178,20 +2320,20 @@ body::before{
     <div class="what-grid">
       <div>
         <div class="chip"><div class="chip-dot"></div><span>О программе</span></div>
-        <h2 class="sec-title">Что такое<br>Retail Ready Аудит?</h2>
-        <p class="sec-sub">Экспертная оценка вашего продукта от команды Центра Закупок Сетей™ — платформы с 25-летним опытом организации закупочных сессий с крупнейшими розничными сетями России.</p>
+        <h2 class="sec-title">Что такое<br>Ритейл контракт?</h2>
+        <p class="sec-sub">Сервис профессионального ввода поставщиков и производителей в розничные сети России: от квалификации продукта и коммерческого предложения до переговоров и сопровождения к договору поставки.</p>
         <div class="wpoints">
-          <div class="wpoint"><div class="wpoint-icon icon-audit"></div><div><div class="wpoint-t">Анализ готовности</div><div class="wpoint-d">Оценка продукта по 20+ критериям входа в сеть: упаковка, цена, объём, сертификация</div></div></div>
-          <div class="wpoint"><div class="wpoint-icon icon-score"></div><div><div class="wpoint-t">Вероятность входа</div><div class="wpoint-d">Конкретная цифра: насколько закупщик готов рассмотреть ваш продукт сегодня</div></div></div>
-          <div class="wpoint"><div class="wpoint-icon icon-plan"></div><div><div class="wpoint-t">План действий</div><div class="wpoint-d">Пошаговый список доработок для увеличения шансов на одобрение</div></div></div>
-          <div class="wpoint"><div class="wpoint-icon icon-access"></div><div><div class="wpoint-t">Доступ к Центру Закупок Сетей™</div><div class="wpoint-d">После аудита — возможность выхода на переговоры через платформу Центра Закупок Сетей™</div></div></div>
+          <div class="wpoint"><div class="wpoint-icon icon-audit"></div><div><div class="wpoint-t">Квалификация поставщика</div><div class="wpoint-d">Проверяем продукт, цену, объём, документы, упаковку и готовность к требованиям закупщиков.</div></div></div>
+          <div class="wpoint"><div class="wpoint-icon icon-score"></div><div><div class="wpoint-t">Коммерческое предложение</div><div class="wpoint-d">Пересобираем КП под логику сети: экономика, категория, полка, аргументы для закупщика.</div></div></div>
+          <div class="wpoint"><div class="wpoint-icon icon-plan"></div><div><div class="wpoint-t">Маршрут к сетям</div><div class="wpoint-d">Выбираем релевантные сети, ЛПР и формат выхода: запрос, встреча, предварительная договорённость.</div></div></div>
+          <div class="wpoint"><div class="wpoint-icon icon-access"></div><div><div class="wpoint-t">Переговоры до результата</div><div class="wpoint-d">Даём обратную связь с причинами отказа, условиями доработки или следующим шагом к контракту.</div></div></div>
         </div>
       </div>
       <div>
         <div class="what-photo">
           <img src="/images/events/event-main.jpg" alt="Переговоры Центра Закупок Сетей" loading="lazy" decoding="async">
           <div class="photo-badge">
-            <div class="pb-label">Центр Закупок Сетей™</div>
+            <div class="pb-label">Сейл Трекер</div>
             <div class="pb-text">Переговоры с закупщиками Верный, ВкусВилл, Ашан, Лента, Пятёрочка и ещё 50+ сетей</div>
           </div>
         </div>
@@ -2203,15 +2345,15 @@ body::before{
 <section class="how">
   <div class="container">
     <div class="chip light"><div class="chip-dot"></div><span>Как работает</span></div>
-    <h2 class="sec-title" style="color:var(--white)">Путь к полке за 48 часов</h2>
-    <p class="sec-sub" style="color:rgba(255,255,255,.45)">Простой процесс — конкретный результат без лишней теории.</p>
+    <h2 class="sec-title" style="color:var(--white)">Маршрут к контракту</h2>
+    <p class="sec-sub" style="color:rgba(255,255,255,.45)">Понятная последовательность шагов: от первичной диагностики до решения сети и договора поставки.</p>
     <div class="steps">
-      <div class="step"><div class="step-n">01</div><div class="step-icon icon-form"></div><div class="step-t">Заполните форму</div><div class="step-d">3–5 минут: продукт, цены, объём производства</div></div>
-      <div class="step"><div class="step-n">02</div><div class="step-icon icon-confirm"></div><div class="step-t">Подтверждение</div><div class="step-d">Эксперт Центра Закупок Сетей™ берёт заявку в работу за 2 часа</div></div>
-      <div class="step"><div class="step-n">03</div><div class="step-icon icon-pay"></div><div class="step-t">Оплата тарифа</div><div class="step-d">Аудит или Аудит + участие в переговорах Центра Закупок Сетей™</div></div>
-      <div class="step"><div class="step-n">04</div><div class="step-icon icon-search"></div><div class="step-t">Экспертный анализ</div><div class="step-d">Аудитор Центра Закупок Сетей™ проводит анализ по критериям закупщиков</div></div>
-      <div class="step"><div class="step-n">05</div><div class="step-icon icon-report"></div><div class="step-t">Получаете отчёт</div><div class="step-d">Оценка, вероятность входа, план доработки</div></div>
-      <div class="step"><div class="step-n">06</div><div class="step-icon icon-retail"></div><div class="step-t">Переговоры</div><div class="step-d">По тарифу 2 — выходим на закупщика Центра Закупок Сетей™ вместе</div></div>
+      <div class="step"><div class="step-n">01</div><div class="step-icon icon-form"></div><div class="step-t">Заявка и вводные</div><div class="step-d">3–5 минут: продукт, категория, экономика, объём производства и целевые сети.</div></div>
+      <div class="step"><div class="step-n">02</div><div class="step-icon icon-confirm"></div><div class="step-t">ABC-оценка</div><div class="step-d">Определяем потенциал поставщика, риски и реальный формат входа в сети.</div></div>
+      <div class="step"><div class="step-n">03</div><div class="step-icon icon-pay"></div><div class="step-t">Проверка КП</div><div class="step-d">Собираем предложение в формате, понятном закупщику и коммерческому директору сети.</div></div>
+      <div class="step"><div class="step-n">04</div><div class="step-icon icon-search"></div><div class="step-t">Подбор сетей</div><div class="step-d">Выбираем релевантные федеральные, региональные или локальные сети и ЛПР.</div></div>
+      <div class="step"><div class="step-n">05</div><div class="step-icon icon-report"></div><div class="step-t">Ответ сети</div><div class="step-d">Получаете интерес, причины отказа или условия, при которых продукт готовы рассматривать.</div></div>
+      <div class="step"><div class="step-n">06</div><div class="step-icon icon-retail"></div><div class="step-t">Договор поставки</div><div class="step-d">Сопровождаем переговоры и фиксируем следующий шаг: договор, пилот или план доработки.</div></div>
     </div>
   </div>
 </section>
@@ -2243,37 +2385,51 @@ body::before{
 <section class="pricing" id="pricing">
   <div class="container">
     <div class="chip"><div class="chip-dot"></div><span>Тарифы</span></div>
-    <h2 class="sec-title">Выберите формат аудита</h2>
-    <p class="sec-sub">Готовность к закупщику за 48 часов. Прозрачная цена, конкретный результат.</p>
+    <h2 class="sec-title">Выберите формат входа в сети</h2>
+    <p class="sec-sub">Оплата привязана к понятному результату: диагностика, ответ сети, предварительная договорённость или сопровождение до договора.</p>
     <div class="pgrid">
       <div class="pcard">
-        <div class="ptag">Тариф 1</div>
-        <div class="pname">Retail Ready<br>Аудит</div>
+        <div class="ptag">Формат 1</div>
+        <div class="pname">Диагностика<br>и проверка КП</div>
         <div class="pamount">50 000 ₽</div>
         <ul class="pfeat">
-          <li>Анализ продукта за 48 часов</li>
-          <li>Оценка готовности к входу (0–100 баллов)</li>
-          <li>Вероятность одобрения закупщиком, %</li>
-          <li>Список критических ошибок продукта</li>
-          <li>Конкретный план доработки</li>
-          <li>Консультация с экспертом Центра Закупок Сетей™ 30 мин</li>
+          <li>ABC-оценка потенциала поставщика</li>
+          <li>Проверка продукта, цены, документов и объёма</li>
+          <li>Разбор коммерческого предложения</li>
+          <li>Список критических рисков для закупщика</li>
+          <li>План доработки перед выходом в сети</li>
+          <li>Консультация с экспертом Центра Закупок Сетей™</li>
         </ul>
         <button class="btn-price" onclick="showForm('audit')">Подать заявку →</button>
       </div>
       <div class="pcard ft">
         <div class="ribbon">Популярный</div>
-        <div class="ptag">Тариф 2</div>
-        <div class="pname">Аудит +<br>Переговоры Центра Закупок Сетей™</div>
+        <div class="ptag">Формат 2</div>
+        <div class="pname">Ответ сети<br>и договорённость</div>
         <div class="pamount">150 000 ₽</div>
         <ul class="pfeat">
-          <li>Всё из тарифа «Аудит»</li>
-          <li>Переговорная стратегия под вашу сеть</li>
-          <li>Прямой выход на закупщика Центра Закупок Сетей™</li>
-          <li>Участие эксперта в переговорах</li>
-          <li>Подготовка коммерческого предложения</li>
-          <li>Сопровождение до заключения договора</li>
+          <li>Всё из формата диагностики</li>
+          <li>Подбор релевантных сетей и ЛПР</li>
+          <li>Предложение в формате, удобном сети</li>
+          <li>Проверка интереса закупщика по чек-листу</li>
+          <li>Причины отказа или условия доработки</li>
+          <li>Маршрут к встрече или предварительной договорённости</li>
         </ul>
         <button class="btn-price" onclick="showForm('audit_plus')">Подать заявку →</button>
+      </div>
+      <div class="pcard">
+        <div class="ptag">Формат 3</div>
+        <div class="pname">Сопровождение<br>до контракта</div>
+        <div class="pamount">300–500 тыс. ₽</div>
+        <ul class="pfeat">
+          <li>Подготовка переговорной стратегии</li>
+          <li>Участие эксперта в переговорах с сетью</li>
+          <li>Согласование следующих шагов и условий</li>
+          <li>Сопровождение до договора поставки</li>
+          <li>Возможна модель фикс + % от поставок</li>
+          <li>Фокус на федеральные и сильные региональные сети</li>
+        </ul>
+        <button class="btn-price" onclick="showForm('contract')">Обсудить маршрут →</button>
       </div>
     </div>
   </div>
@@ -2282,28 +2438,28 @@ body::before{
 <div class="trust trust-after-pricing">
   <div class="container">
     <div class="trust-inner">
-      <div class="trust-item"><div class="trust-num">10 000+</div><div class="trust-lbl">участников сообщества</div></div>
-      <div class="trust-item"><div class="trust-num">2 000+</div><div class="trust-lbl">закупщиков в базе</div></div>
-      <div class="trust-item"><div class="trust-num">1 500+</div><div class="trust-lbl">поставщиков-клиентов</div></div>
-      <div class="trust-item"><div class="trust-num">400+</div><div class="trust-lbl">мероприятий за 25 лет</div></div>
+      <div class="trust-item"><div class="trust-num">26</div><div class="trust-lbl">лет практики в переговорах</div></div>
+      <div class="trust-item"><div class="trust-num">350+</div><div class="trust-lbl">сетей в экспертизе команды</div></div>
+      <div class="trust-item"><div class="trust-num">36 000+</div><div class="trust-lbl">писем и договорённостей</div></div>
+      <div class="trust-item"><div class="trust-num">80%</div><div class="trust-lbl">эффективность маршрута</div></div>
     </div>
   </div>
 </div>
 
 <section class="cta">
   <div class="container" style="position:relative;z-index:1">
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:14px;opacity:.9">Центр Закупок Сетей™</div>
-    <h2 class="sec-title" style="color:var(--white)">Готовы узнать, возьмёт ли вас сеть?</h2>
-    <p style="color:rgba(255,255,255,.55);font-size:15px;margin:0 auto 32px;max-width:480px">Заполните форму за 3–5 минут. Эксперт Центра Закупок Сетей™ свяжется с вами в течение 2 часов.</p>
-    <button class="btn-hero" style="font-size:16px;padding:16px 42px" onclick="showForm()">Начать Retail Ready Аудит →</button>
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:14px;opacity:.9">Платформа Сейл Трекер</div>
+    <h2 class="sec-title" style="color:var(--white)">Готовы пройти путь к договору поставки?</h2>
+    <p style="color:rgba(255,255,255,.55);font-size:15px;margin:0 auto 32px;max-width:560px">Заполните форму за 3–5 минут. Эксперт оценит готовность продукта и предложит маршрут входа в подходящие сети.</p>
+    <button class="btn-hero" style="font-size:16px;padding:16px 42px" onclick="showForm()">Начать Ритейл контракт →</button>
   </div>
 </section>
 
 <footer>
   <div class="container">
     <div class="footer-inner">
-      <div class="footer-brand">Центр Закупок Сетей™ · <span>Retail Ready Аудит</span></div>
-      <div class="footer-copy">© 2025 Центр Закупок Сетей™ · platforma-czs.ru</div>
+      <div class="footer-brand">Сейл Трекер · <span>Ритейл контракт</span></div>
+      <div class="footer-copy">© 2026 Сейл Трекер · platforma-czs.ru</div>
     </div>
   </div>
 </footer>
@@ -2314,13 +2470,13 @@ body::before{
   <div class="container">
     <div class="fwrap">
       <div class="czs-banner">
-        <div class="czs-banner-logo">Центр Закупок Сетей™</div>
-        <div class="czs-banner-txt"><b>Retail Ready Аудит</b>Проект Центра Закупок Сетей™ · platforma-czs.ru</div>
+        <div class="czs-banner-logo">СТ</div>
+        <div class="czs-banner-txt"><b>Ритейл контракт</b>Платформа Сейл Трекер</div>
       </div>
       <div style="margin-bottom:28px">
-        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:8px">Заявка на аудит</div>
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--coral);margin-bottom:8px">Заявка на диагностику</div>
         <h1 style="font-family:var(--ff-h);font-size:clamp(28px,4vw,40px);font-weight:900;color:var(--navy-dark);letter-spacing:-.3px;margin-bottom:6px">Расскажите о продукте</h1>
-        <p style="color:var(--gray);font-size:14px">Заполните форму за 3–5 минут. Эксперт Центра Закупок Сетей™ свяжется в течение 2 часов.</p>
+        <p style="color:var(--gray);font-size:14px">Заполните форму за 3–5 минут. Эксперт оценит готовность продукта к сетям и предложит маршрут к контракту.</p>
       </div>
       <div class="fprog">
         <div class="fstep active" id="p0">01 О вас</div>
@@ -2379,7 +2535,7 @@ body::before{
             <textarea class="ft" id="f-desc" rows="5" placeholder="Состав, упаковка, срок годности, УТП, текущие точки продаж, регион производства..."></textarea>
             <div class="voice-row">
               <span class="voice-note">Нажмите кнопку, говорите спокойно и законченными фразами. Текст будет добавляться в описание продукта.</span>
-              <button class="voice-btn" id="voice-desc" type="button" onclick="toggleVoiceInput()">🎙 Голосовой ввод</button>
+              <button class="voice-btn" id="voice-desc" type="button" onclick="toggleVoiceInput()">Голосовой ввод</button>
               <span class="voice-status" id="voice-status">Голосовой ввод работает через браузер. Если появится запрос — разрешите микрофон.</span>
             </div>
             <span class="ferr" id="e-desc"></span>
@@ -2388,7 +2544,7 @@ body::before{
             <label class="flbl">Презентация / КП</label>
             <label class="filebox" for="f-kp">
               <input id="f-kp" type="file" onchange="updateFileBox()" accept=".pdf,.ppt,.pptx,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation">
-              <span class="file-ico">📎</span>
+              <span class="file-ico"></span>
               <span class="file-main"><b id="file-title">Прикрепить КП или презентацию</b><span id="file-hint">PDF, PPT, PPTX, DOC или DOCX до 8 МБ</span></span>
               <span class="file-action">Выбрать файл</span>
             </label>
@@ -2396,7 +2552,7 @@ body::before{
           </div>
         </div>
         <div id="s2" style="display:none">
-          <h2>Экономика</h2><div class="fsub">Цены и объём производства — ключевые данные для расчёта вероятности входа</div>
+          <h2>Экономика</h2><div class="fsub">Цены, объём производства и целевые сети помогают определить реальный маршрут входа.</div>
           <div class="frow">
             <div class="fg"><label class="flbl">Цена товара, ₽</label><input class="fi" id="f-price" placeholder="89" type="number" min="0"><div class="fhint">Цена товара для расчёта экономики входа</div><span class="ferr" id="e-price"></span></div>
             <div class="fg"><label class="flbl">РРЦ (цена на полке), ₽</label><input class="fi" id="f-rrp" placeholder="89" type="number" min="0"><div class="fhint">Рекомендованная розничная цена</div><span class="ferr" id="e-rrp"></span></div>
@@ -2419,7 +2575,7 @@ body::before{
               <textarea class="ft" id="f-ans" rows="3" placeholder="Комментарий: уже были переговоры, отказы или есть приоритетные сети." style="margin-top:12px"></textarea>
               <div class="voice-row" style="margin-top:10px">
                 <span class="voice-note">Нажмите кнопку и расскажите голосом: были ли переговоры, отказы, приоритетные сети.</span>
-                <button class="voice-btn" id="voice-ans" type="button" onclick="toggleVoiceInputAns()">🎙 Голосовой ввод</button>
+                <button class="voice-btn" id="voice-ans" type="button" onclick="toggleVoiceInputAns()">Голосовой ввод</button>
                 <span class="voice-status" id="voice-status-ans">Голосовой ввод работает через браузер. Если появится запрос — разрешите микрофон.</span>
               </div>
             </div>
@@ -2430,7 +2586,7 @@ body::before{
           <button class="btn-bk" id="btn-bk" onclick="fBack()" style="display:none">← Назад</button>
           <label class="consent-box" id="consent-box">
             <input type="checkbox" id="f-consent">
-            <span><b>Согласие на обработку данных</b>Я согласен на обработку персональных данных для связи по заявке Retail Ready Аудит.</span>
+            <span><b>Согласие на обработку данных</b>Я согласен на обработку персональных данных для связи по заявке «Ритейл контракт».</span>
           </label>
           <button class="btn-f" id="btn-nx" onclick="fNext()">Далее →</button>
         </div>
@@ -2445,12 +2601,12 @@ body::before{
   <div class="tcard">
     <div class="tcheck">✓</div>
     <div class="ttitle">Заявка принята!</div>
-    <p class="ttext">Эксперт Центра Закупок Сетей™ свяжется с вами в течение&nbsp;2&nbsp;часов. Аудит будет готов за&nbsp;48&nbsp;часов после оплаты.</p>
+    <p class="ttext">Эксперт Центра Закупок Сетей™ свяжется с вами в течение&nbsp;2&nbsp;часов, уточнит вводные и предложит следующий шаг по маршруту входа в сети.</p>
     <div class="tmeta">
-      <div><b>48ч</b><span>Срок аудита</span></div>
-      <div><b>80%</b><span>Успешных входов</span></div>
+      <div><b>ABC</b><span>оценка потенциала</span></div>
+      <div><b>80%</b><span>эффективность</span></div>
     </div>
-    <div class="tczs">🏢 Retail Ready Аудит · Проект Центра Закупок Сетей™</div>
+    <div class="tczs">Ритейл контракт · Платформа Сейл Трекер</div>
     <p style="font-size:12px;color:var(--gray);margin-bottom:20px">ID заявки: <span class="tid" id="app-id">—</span></p>
     <button class="btn-f" style="width:100%" onclick="showLanding()">Вернуться на главную</button>
   </div>
@@ -2473,9 +2629,10 @@ var phoneCountries=[
   {code:'MD',dial:'+373',flagUrl:'https://flagcdn.com/48x36/md.png',label:'Молдова',example:'69 000-000'}
 ];
 function tariffLabel(value){
-  if(value==='audit_plus')return 'Аудит + переговоры';
-  if(value==='audit')return 'Аудит';
-  return 'Уточнить тариф';
+  if(value==='contract')return 'Сопровождение до контракта';
+  if(value==='audit_plus')return 'Ответ сети и договорённость';
+  if(value==='audit')return 'Диагностика и проверка КП';
+  return 'Подобрать маршрут';
 }
 function showLanding(){
   document.getElementById('pg-landing').style.display='block';
@@ -2783,7 +2940,7 @@ function stopVoiceInput(){
     try{voiceRecognizer.stop();}catch(e){}
     voiceRecognizer=null;
   }
-  if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+  if(btn){btn.classList.remove('active');btn.textContent='Голосовой ввод';}
   setVoiceStatus('Запись остановлена. Проверьте текст и при необходимости дополните вручную.');
 }
 function toggleVoiceInput(){
@@ -2803,7 +2960,7 @@ function toggleVoiceInput(){
   voiceRecognizer.maxAlternatives=1;
   voiceActive=true;
   btn.classList.add('active');
-  btn.textContent='⏹ Остановить';
+  btn.textContent='Остановить';
   setVoiceStatus('Слушаю. Говорите фразами по 5–10 секунд, после паузы текст появится в поле.');
   voiceRecognizer.onresult=function(event){
     var interim='';
@@ -2831,7 +2988,7 @@ function toggleVoiceInput(){
     setVoiceStatus(msg);
     if(event&&event.error==='not-allowed') setFormStatus(msg);
     voiceActive=false;
-    if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+    if(btn){btn.classList.remove('active');btn.textContent='Голосовой ввод';}
   };
   try{voiceRecognizer.start();}catch(e){stopVoiceInput();}
 }
@@ -2842,7 +2999,7 @@ function stopVoiceInputAns(){
     try{voiceRecognizerAns.stop();}catch(e){}
     voiceRecognizerAns=null;
   }
-  if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+  if(btn){btn.classList.remove('active');btn.textContent='Голосовой ввод';}
   setVoiceStatusAns('Запись остановлена. Проверьте текст и при необходимости дополните вручную.');
 }
 function toggleVoiceInputAns(){
@@ -2861,7 +3018,7 @@ function toggleVoiceInputAns(){
   voiceRecognizerAns.maxAlternatives=1;
   voiceActiveAns=true;
   btn.classList.add('active');
-  btn.textContent='⏹ Остановить';
+  btn.textContent='Остановить';
   setVoiceStatusAns('Слушаю. Говорите фразами по 5–10 секунд, после паузы текст появится в поле.');
   voiceRecognizerAns.onresult=function(event){
     var interim='';
@@ -2887,7 +3044,7 @@ function toggleVoiceInputAns(){
     if(event&&event.error==='no-speech') msg='Речь не распознана. Попробуйте говорить ближе к микрофону и чуть медленнее.';
     setVoiceStatusAns(msg);
     voiceActiveAns=false;
-    if(btn){btn.classList.remove('active');btn.textContent='🎙 Голосовой ввод';}
+    if(btn){btn.classList.remove('active');btn.textContent='Голосовой ввод';}
   };
   try{voiceRecognizerAns.start();}catch(e){stopVoiceInputAns();}
 }
@@ -2971,7 +3128,7 @@ async function fNext(){
     var j={};
     try{j=await r.json();}catch(_){}
     if(!r.ok)throw new Error(j.message||'Сервер не принял заявку');
-    showThanks(j.id||j.applicationId||'RRA-'+Math.random().toString(36).slice(2,7).toUpperCase());
+    showThanks(j.id||j.applicationId||'RC-'+Math.random().toString(36).slice(2,7).toUpperCase());
   }catch(err){
     setFormStatus(err && err.message ? err.message : 'Заявка не отправлена менеджеру: API /api/applications пока не отвечает. Проверьте запуск backend или Next.js проекта и попробуйте ещё раз.');
   }finally{

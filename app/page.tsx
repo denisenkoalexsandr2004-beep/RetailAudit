@@ -3,7 +3,7 @@ export default function HomePage() {
     <iframe
       className="exactLandingFrame"
       src="/retail-ready-audit.html"
-      title="Retail Ready Аудит"
+      title="Ритейл контракт"
     />
   );
 }
