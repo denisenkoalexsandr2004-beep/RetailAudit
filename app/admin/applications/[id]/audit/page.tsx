@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { getTariffLabel, type TariffCode } from '@/lib/tariffs';
 
 type Application = {
   id: string;
@@ -14,7 +15,7 @@ type Application = {
   productName: string;
   category: string;
   description: string;
-  tariff: 'audit' | 'audit_plus';
+  tariff: TariffCode;
   status?: 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
   createdAt?: string;
   productionCost?: string;
@@ -63,7 +64,7 @@ type Audit = {
   updatedAt: string;
 };
 
-const statusLabels = {
+const statusLabels: Record<Audit['status'], string> = {
   draft: 'Черновик',
   expert_review: 'Экспертная проверка',
   approved: 'Утверждён'
@@ -128,10 +129,7 @@ export default function AuditStudioPage() {
     const headers = new Headers(init.headers);
     headers.set('Content-Type', 'application/json');
     headers.set('x-admin-token', currentToken);
-    const response = await fetch(path, {
-      ...init,
-      headers
-    });
+    const response = await fetch(path, { ...init, headers });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || `Запрос не выполнен. HTTP ${response.status}`);
     return data;
@@ -244,11 +242,11 @@ export default function AuditStudioPage() {
   }, [applicationId]);
 
   return (
-    <main className="adminExact auditStudio">
+    <main className="adminExact adminRetail auditStudio">
       <nav className="adminExactNav">
         <Link className="adminExactBrand" href="/admin/applications">
-          <span className="adminExactPill">Центр Закупок Сетей™</span>
-          <span className="adminExactTitle">Retail Ready <b>Audit Studio</b></span>
+          <span className="adminExactPill">Сейл Трекер</span>
+          <span className="adminExactTitle">Ритейл <b>контракт</b></span>
         </Link>
         <div className="adminExactLinks">
           <Link href="/admin/applications">Заявки</Link>
@@ -264,7 +262,7 @@ export default function AuditStudioPage() {
               <b>Внутренний аудит</b>
             </div>
             <h1>Audit Studio</h1>
-            <p>{application ? `${application.company} · ${application.productName}` : 'Рабочее место аудитора Retail Ready'}</p>
+            <p>{application ? `${application.company} · ${application.productName}` : 'Рабочее место эксперта Ритейл контракта'}</p>
           </div>
           {audit && (
             <div className="auditScorePanel">
@@ -345,7 +343,7 @@ export default function AuditStudioPage() {
               <p>{application.company}</p>
               <dl>
                 <div><dt>Категория</dt><dd>{application.category}</dd></div>
-                <div><dt>Тариф</dt><dd>{application.tariff === 'audit_plus' ? 'Аудит + переговоры' : 'Аудит'}</dd></div>
+                <div><dt>Тариф</dt><dd>{getTariffLabel(application.tariff, true)}</dd></div>
                 <div><dt>Цена / РРЦ</dt><dd>{application.productionCost || '-'} / {application.retailPrice || '-'}</dd></div>
                 <div><dt>Объём</dt><dd>{application.monthlyVolume || '-'}</dd></div>
                 <div><dt>Сети</dt><dd>{application.networkNames || application.targetNetworks || '-'}</dd></div>
@@ -367,7 +365,7 @@ export default function AuditStudioPage() {
             {!audit ? (
               <div className="auditStudioEmpty">
                 <h2>Аудит ещё не создан</h2>
-                <p>Заявка готова к первичному скорингу по методологии ЦЗС.</p>
+                <p>Заявка готова к первичному скорингу по методологии Ритейл контракта.</p>
                 <button className="auditStudioButton" type="button" onClick={generate} disabled={working}>
                   {working ? 'Формирую...' : 'Сформировать черновик'}
                 </button>

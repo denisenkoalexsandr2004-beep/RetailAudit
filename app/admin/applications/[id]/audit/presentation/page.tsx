@@ -294,8 +294,8 @@ function PresentationIcon({ kind }: { kind: string }) {
 function SlideHeader({ page }: { page: number }) {
   return (
     <header>
-      <span>Центр Закупок Сетей™</span>
-      <b>Retail Ready Аудит</b>
+      <span>Платформа Центр Закупок Сетей™</span>
+      <b>Ритейл контракт</b>
       <em>{page} / 8</em>
     </header>
   );

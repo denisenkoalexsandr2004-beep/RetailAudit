@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { getTariffLabel, type TariffCode } from '@/lib/tariffs';
+import { getTariffLabel } from '@/lib/tariffs';
 
 type ApplicationStatus = 'new' | 'invoice_sent' | 'paid_in_work' | 'completed' | 'rejected';
+type TariffCode = 'to_clarify' | 'audit' | 'audit_plus' | 'contract';
 
 type Application = {
   id: string;
@@ -35,12 +36,12 @@ type Application = {
   notes?: string;
 };
 
-const statusFlow: Array<{ value: ApplicationStatus; label: string }> = [
-  { value: 'new', label: 'Новая' },
-  { value: 'invoice_sent', label: 'Выставили счёт' },
-  { value: 'paid_in_work', label: 'Счёт оплачен, в работе' },
-  { value: 'completed', label: 'Завершена' },
-  { value: 'rejected', label: 'Отказ' }
+const statusFlow: Array<{ value: ApplicationStatus; label: string; hint: string }> = [
+  { value: 'new', label: 'Новая', hint: 'Заявка получена' },
+  { value: 'invoice_sent', label: 'Счёт выставлен', hint: 'Ждём оплату' },
+  { value: 'paid_in_work', label: 'В работе', hint: 'Запущен разбор' },
+  { value: 'completed', label: 'Завершена', hint: 'Маршрут закрыт' },
+  { value: 'rejected', label: 'Отказ', hint: 'Не подходит' }
 ];
 
 const statusLabels = statusFlow.reduce(
@@ -56,8 +57,15 @@ const telegramLabels = {
 
 function normalizeStatus(status: string): ApplicationStatus {
   if (status === 'in_work' || status === 'waiting_client') return 'invoice_sent';
-  if (['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'].includes(status)) return status as ApplicationStatus;
+  if (['new', 'invoice_sent', 'paid_in_work', 'completed', 'rejected'].includes(status)) {
+    return status as ApplicationStatus;
+  }
   return 'new';
+}
+
+function tariffLabel(value: TariffCode) {
+  if (value === 'contract') return 'Сопровождение до контракта';
+  return getTariffLabel(value);
 }
 
 function formatFileSize(size?: number) {
@@ -76,6 +84,11 @@ function telegramHref(value?: string) {
 
 function csvEscape(value: unknown) {
   return `"${String(value ?? '').replace(/"/g, '""')}"`;
+}
+
+function metricValue(value?: string, suffix = '') {
+  const clean = String(value || '').trim();
+  return clean ? `${clean}${suffix}` : '-';
 }
 
 export default function AdminApplicationsPage() {
@@ -106,7 +119,8 @@ export default function AdminApplicationsPage() {
     }
     const list = (data.applications || []).map((item: Application) => ({
       ...item,
-      status: normalizeStatus(String(item.status))
+      status: normalizeStatus(String(item.status)),
+      tariff: String(item.tariff || 'to_clarify') as TariffCode
     }));
     setApplications(list);
     setSelected((current) => list.find((item: Application) => item.id === current?.id) || list[0] || null);
@@ -122,7 +136,11 @@ export default function AdminApplicationsPage() {
     if (response.ok) {
       const data = await response.json().catch(() => ({}));
       if (data.application) {
-        const application = { ...data.application, status: normalizeStatus(String(data.application.status)) };
+        const application = {
+          ...data.application,
+          status: normalizeStatus(String(data.application.status)),
+          tariff: String(data.application.tariff || 'to_clarify') as TariffCode
+        };
         setApplications((items) => items.map((item) => item.id === id ? application : item));
         setSelected(application);
       } else {
@@ -177,7 +195,7 @@ export default function AdminApplicationsPage() {
       ['telegram', 'Telegram'],
       ['email', 'Email'],
       ['category', 'Категория'],
-      ['productName', 'Название продукта'],
+      ['productName', 'Продукт'],
       ['productionCost', 'Цена товара'],
       ['retailPrice', 'РРЦ'],
       ['monthlyVolume', 'Объём в месяц'],
@@ -189,7 +207,7 @@ export default function AdminApplicationsPage() {
     ];
     const rows = applications.map((application) => columns.map(([key]) => {
       if (key === 'statusLabel') return csvEscape(statusLabels[application.status] || application.status);
-      if (key === 'tariffLabel') return csvEscape(getTariffLabel(application.tariff));
+      if (key === 'tariffLabel') return csvEscape(tariffLabel(application.tariff));
       return csvEscape(application[key]);
     }).join(';'));
     const csv = [columns.map(([, title]) => csvEscape(title)).join(';'), ...rows].join('\r\n');
@@ -211,14 +229,14 @@ export default function AdminApplicationsPage() {
     : applications.filter((application) => application.status === statusFilter);
 
   return (
-    <main className="adminExact">
+    <main className="adminExact adminRetail">
       <nav className="adminExactNav">
         <a className="adminExactBrand" href="/">
-          <span className="adminExactPill">Центр Закупок Сетей™</span>
-          <span className="adminExactTitle">Retail Ready <b>Аудит</b></span>
+          <span className="adminExactPill">Сейл Трекер</span>
+          <span className="adminExactTitle">Ритейл <b>контракт</b></span>
         </a>
         <div className="adminExactLinks">
-          {token && <a href={selected ? `/admin/applications/${selected.id}/audit` : '/admin/applications'}>Audit Studio</a>}
+          {token && selected && <a href={`/admin/applications/${selected.id}/audit`}>Audit Studio</a>}
           {token && <button className="adminExactLogout" type="button" onClick={logoutAdmin}>Выйти</button>}
           <a className="adminExactNavBtn" href="/">Открыть сайт</a>
         </div>
@@ -229,10 +247,14 @@ export default function AdminApplicationsPage() {
           <div className="adminExactHeroLeft">
             <div className="adminExactTag">
               <span />
-              <b>Проект Центра Закупок Сетей™</b>
+              <b>Платформа Центр Закупок Сетей™</b>
             </div>
-            <h1>{token ? 'Рабочий стол' : 'Вход в систему'}</h1>
-            {token && <p>Лиды, продукт, сети, КП, экономика и текущий этап сделки в одном месте.</p>}
+            <h1 className={!token ? 'adminLoginTitle' : undefined}>{token ? 'Админка заявок' : 'Вход в админку'}</h1>
+            <p>
+              {token
+                ? 'Единый рабочий стол по заявкам Ритейл контракта: контакты, продукт, КП, экономика, целевые сети и статус сделки.'
+                : 'Авторизуйтесь, чтобы открыть заявки поставщиков и управлять этапами работы.'}
+            </p>
           </div>
           {!token ? (
             <div className="adminExactLogin">
@@ -244,145 +266,153 @@ export default function AdminApplicationsPage() {
                 <span>Пароль</span>
                 <input value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" type="password" autoComplete="current-password" onKeyDown={e => { if (e.key === 'Enter') loginAdmin(); }} />
               </label>
-              <button onClick={loginAdmin}>Войти</button>
+              <button type="button" onClick={loginAdmin}>Войти</button>
             </div>
           ) : (
             <div className="adminExactSession">
-              <span>Вход выполнен</span>
-              <b>Админ-панель открыта</b>
+              <span>Сессия активна</span>
+              <b>{applications.length} заявок в базе</b>
             </div>
           )}
         </div>
       </section>
 
-      {token && (
-        <section className="adminExactStats">
-          {statusFlow.map(({ value, label }) => (
-            <button className={`status-${value} ${statusFilter === value ? 'active' : ''}`} key={value} type="button" onClick={() => chooseStatusFilter(value)}>
-              <b>{applications.filter(a => a.status === value).length}</b>
-              <span>{label}</span>
-            </button>
-          ))}
-          <a href={csvHref} download="retail-ready-applications.csv">Скачать Microsoft Excel</a>
-        </section>
-      )}
-
       {error && <div className="adminExactError">{error}</div>}
 
       {token && (
-        <section className="adminExactWork adminExactContainer">
-          <div className="adminExactSectionHead">
-            <h2>Заявки</h2>
-            <p>Здесь находятся все заявки: контакты клиента, продукт, сети, КП, экономика и текущий этап сделки.</p>
-          </div>
-          <div className="adminExactListFilter" aria-label="Фильтр статусов заявок">
-            <span>Фильтр заявок</span>
-            <button type="button" className={statusFilter === 'all' ? 'active' : ''} onClick={() => chooseStatusFilter('all')}>Все</button>
-            {statusFlow.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                className={`status-${value} ${statusFilter === value ? 'active' : ''}`}
-                onClick={() => chooseStatusFilter(value)}
-              >
-                {label}
+        <>
+          <section className="adminExactStats">
+            {statusFlow.map(({ value, label, hint }) => (
+              <button className={`status-${value} ${statusFilter === value ? 'active' : ''}`} key={value} type="button" onClick={() => chooseStatusFilter(value)}>
+                <b>{applications.filter(a => a.status === value).length}</b>
+                <span>{label}</span>
+                <small>{hint}</small>
               </button>
             ))}
-          </div>
-          <aside className="adminExactList">
-            {filteredApplications.length === 0 && (
-              <div className="adminExactEmpty">
-                <b>Заявок пока нет</b>
-                <span>{statusFilter === 'all' ? 'После отправки формы клиентом заявки появятся здесь.' : 'В этом статусе пока нет заявок.'}</span>
-              </div>
-            )}
-            {filteredApplications.map((app, index) => (
-              <button key={app.id} className={`${selected?.id === app.id ? 'selected' : ''} status-${app.status}`} onClick={() => setSelected(app)}>
-                <i className="adminExactLeadNo">{index + 1}</i>
-                <span>{app.id}</span>
-                <b>{app.company}</b>
-                <small>{app.productName}</small>
-                <em>{statusLabels[app.status]}</em>
-              </button>
-            ))}
-          </aside>
+            <a href={csvHref} download="retail-contract-applications.csv">Скачать Excel</a>
+          </section>
 
-          {selected && (
-            <article className="adminExactDetails">
-              <div className={`adminExactPipeline ${updatingId === selected.id ? 'updating' : ''}`} aria-label="Статус сделки">
-                {statusFlow.map((stage, index) => (
-                  <button
-                    key={stage.value}
-                    type="button"
-                    className={[
-                      'adminExactStage',
-                      `status-${stage.value}`,
-                      selected.status === stage.value ? 'active' : '',
-                      index < selectedStageIndex ? 'passed' : ''
-                    ].join(' ')}
-                    onClick={() => updateStatus(selected.id, stage.value)}
-                    disabled={updatingId === selected.id}
-                  >
-                    <small>Этап {index + 1}</small>
-                    <span>{stage.label}</span>
-                  </button>
-                ))}
-              </div>
+          <section className="adminExactWork adminExactContainer">
+            <div className="adminExactSectionHead">
+              <h2>Заявки</h2>
+              <p>Быстрый обзор поставщиков, статусов и маршрута до контакта с сетями.</p>
+            </div>
 
-              <div className="adminExactInfoBlocks">
-                <section className="adminExactInfoBlock">
-                  <h3>О себе</h3>
-                  <div className="adminExactGrid">
-                    <div><span>Клиент</span><b>{selected.name}</b></div>
-                    <div><span>Телефон</span><b>{selected.phone}</b></div>
-                    <div><span>Telegram</span><b>{tgLink ? <a className="adminExactTelegramLink" href={tgLink} target="_blank" rel="noreferrer">{selected.telegram}</a> : '-'}</b></div>
-                    <div><span>Email</span><b>{selected.email || '-'}</b></div>
-                    <div><span>ID заявки</span><b>{selected.id}</b></div>
-                    <div><span>Дата</span><b>{new Date(selected.createdAt).toLocaleString('ru-RU')}</b></div>
+            <div className="adminExactListFilter" aria-label="Фильтр статусов заявок">
+              <span>Фильтр</span>
+              <button type="button" className={statusFilter === 'all' ? 'active' : ''} onClick={() => chooseStatusFilter('all')}>Все</button>
+              {statusFlow.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`status-${value} ${statusFilter === value ? 'active' : ''}`}
+                  onClick={() => chooseStatusFilter(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <aside className="adminExactList">
+              {filteredApplications.length === 0 && (
+                <div className="adminExactEmpty">
+                  <b>Заявок пока нет</b>
+                  <span>{statusFilter === 'all' ? 'После отправки формы заявки появятся здесь.' : 'В этом статусе пока нет заявок.'}</span>
+                </div>
+              )}
+              {filteredApplications.map((app, index) => (
+                <button key={app.id} className={`${selected?.id === app.id ? 'selected' : ''} status-${app.status}`} onClick={() => setSelected(app)}>
+                  <i className="adminExactLeadNo">{String(index + 1).padStart(2, '0')}</i>
+                  <span>{app.id}</span>
+                  <b>{app.company || 'Компания не указана'}</b>
+                  <small>{app.productName || app.category}</small>
+                  <em>{statusLabels[app.status]}</em>
+                </button>
+              ))}
+            </aside>
+
+            {selected && (
+              <article className="adminExactDetails">
+                <header>
+                  <div>
+                    <span>{selected.id}</span>
+                    <h2>{selected.company}</h2>
+                    <p>{selected.productName} · {tariffLabel(selected.tariff)}</p>
                   </div>
-                </section>
+                  <a className="adminExactNavBtn" href={`/admin/applications/${selected.id}/audit`}>Открыть Audit Studio</a>
+                </header>
 
-                <section className="adminExactInfoBlock">
-                  <h3>О компании</h3>
-                  <div className="adminExactGrid">
-                    <div><span>Компания</span><b>{selected.company}</b></div>
-                    <div><span>Тариф</span><b>{getTariffLabel(selected.tariff)}</b></div>
-                    <div><span>Внутренний аудит</span><b><a href={`/admin/applications/${selected.id}/audit`}>Открыть Audit Studio</a></b></div>
-                    <div><span>Telegram-уведомление</span><b>{telegramLabels[selected.telegramStatus]}</b></div>
-                    <div><span>Федеральные сети</span><b>{selected.federalNetworks || '-'}</b></div>
-                    <div><span>Региональные сети</span><b>{selected.regionalNetworks || '-'}</b></div>
-                    <div><span>Локальные сети</span><b>{selected.localNetworks || '-'}</b></div>
-                    <div><span>Другие сети</span><b>{selected.unknownNetworks || '-'}</b></div>
-                    <div className="wide"><span>Все выбранные сети</span><b>{selected.networkNames || selected.targetNetworks || '-'}</b></div>
-                    {selected.notes && <div className="wide"><span>Комментарий</span><b>{selected.notes}</b></div>}
-                  </div>
-                </section>
+                <div className={`adminExactPipeline ${updatingId === selected.id ? 'updating' : ''}`} aria-label="Статус сделки">
+                  {statusFlow.map((stage, index) => (
+                    <button
+                      key={stage.value}
+                      type="button"
+                      className={[
+                        'adminExactStage',
+                        `status-${stage.value}`,
+                        selected.status === stage.value ? 'active' : '',
+                        index < selectedStageIndex ? 'passed' : ''
+                      ].join(' ')}
+                      onClick={() => updateStatus(selected.id, stage.value)}
+                      disabled={updatingId === selected.id}
+                    >
+                      <small>Этап {index + 1}</small>
+                      <span>{stage.label}</span>
+                    </button>
+                  ))}
+                </div>
 
-                <section className="adminExactInfoBlock">
-                  <h3>О продукте</h3>
-                  <div className="adminExactGrid">
-                    <div><span>Продукт</span><b>{selected.productName}</b></div>
-                    <div><span>Категория</span><b>{selected.category}</b></div>
-                    <div><span>Цена товара</span><b>{selected.productionCost ? `${selected.productionCost} ₽` : '-'}</b></div>
-                    <div><span>РРЦ</span><b>{selected.retailPrice ? `${selected.retailPrice} ₽` : '-'}</b></div>
-                    <div><span>Объём</span><b>{selected.monthlyVolume ? `${selected.monthlyVolume} шт/мес` : '-'}</b></div>
-                    <div className="wide">
-                      <span>Презентация / КП</span>
-                      <b>
-                        {selected.presentationUrl ? (
-                          <a href={selected.presentationUrl} target="_blank" rel="noreferrer">
-                            {selected.presentationName || 'Открыть файл'} {formatFileSize(selected.presentationSize)}
-                          </a>
-                        ) : '-'}
-                      </b>
+                <div className="adminExactInfoBlocks">
+                  <section className="adminExactInfoBlock">
+                    <h3>Контакт</h3>
+                    <div className="adminExactGrid">
+                      <div><span>Клиент</span><b>{selected.name}</b></div>
+                      <div><span>Телефон</span><b>{selected.phone}</b></div>
+                      <div><span>Telegram</span><b>{tgLink ? <a className="adminExactTelegramLink" href={tgLink} target="_blank" rel="noreferrer">{selected.telegram}</a> : '-'}</b></div>
+                      <div><span>Email</span><b>{selected.email || '-'}</b></div>
+                      <div><span>Создана</span><b>{new Date(selected.createdAt).toLocaleString('ru-RU')}</b></div>
+                      <div><span>Telegram-статус</span><b>{telegramLabels[selected.telegramStatus]}</b></div>
                     </div>
-                    <div className="wide"><span>Описание продукта</span><b>{selected.description}</b></div>
-                  </div>
-                </section>
-              </div>
-            </article>
-          )}
-        </section>
+                  </section>
+
+                  <section className="adminExactInfoBlock">
+                    <h3>Экономика и сети</h3>
+                    <div className="adminExactGrid">
+                      <div><span>Тариф</span><b>{tariffLabel(selected.tariff)}</b></div>
+                      <div><span>Цена товара</span><b>{metricValue(selected.productionCost, ' ₽')}</b></div>
+                      <div><span>РРЦ</span><b>{metricValue(selected.retailPrice, ' ₽')}</b></div>
+                      <div><span>Объём</span><b>{metricValue(selected.monthlyVolume, ' шт/мес')}</b></div>
+                      <div><span>Федеральные</span><b>{selected.federalNetworks || '-'}</b></div>
+                      <div><span>Региональные</span><b>{selected.regionalNetworks || '-'}</b></div>
+                      <div><span>Локальные</span><b>{selected.localNetworks || '-'}</b></div>
+                      <div className="wide"><span>Все выбранные сети</span><b>{selected.networkNames || selected.targetNetworks || '-'}</b></div>
+                    </div>
+                  </section>
+
+                  <section className="adminExactInfoBlock">
+                    <h3>Продукт</h3>
+                    <div className="adminExactGrid">
+                      <div><span>Категория</span><b>{selected.category}</b></div>
+                      <div><span>Продукт</span><b>{selected.productName}</b></div>
+                      <div className="wide">
+                        <span>Презентация / КП</span>
+                        <b>
+                          {selected.presentationUrl ? (
+                            <a href={selected.presentationUrl} target="_blank" rel="noreferrer">
+                              {selected.presentationName || 'Открыть файл'} {formatFileSize(selected.presentationSize)}
+                            </a>
+                          ) : '-'}
+                        </b>
+                      </div>
+                      <div className="wide"><span>Описание</span><b>{selected.description}</b></div>
+                      {selected.notes && <div className="wide"><span>Комментарий</span><b>{selected.notes}</b></div>}
+                    </div>
+                  </section>
+                </div>
+              </article>
+            )}
+          </section>
+        </>
       )}
     </main>
   );
